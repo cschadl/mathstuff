@@ -90,6 +90,13 @@ void test_matrix()
 	assert(E2 == E1);
 	assert(E1 != E2.transpose());
 
+	E1.resize(1, 2);
+	assert(E1.rows() == 1);
+	assert(E1.cols() == 2);
+	E1.fill(7.0);
+	assert(E1(0, 0) == 7.0);
+	assert(E1(0, 1) == 7.0);
+
 	matrix<double> M4 = M1 + M2;
 	assert(M4 == M1 * 2.0);
 

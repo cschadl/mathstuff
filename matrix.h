@@ -66,7 +66,7 @@ public:
 	explicit matrix(size_t m, size_t n);
 
 	matrix(const matrix<T>& rhs);
-	matrix& operator=(const matrix<T>& rhs);
+	matrix<T>& operator=(const matrix<T>& rhs);
 
 	size_t rows() const { return m_n_rows; }
 	size_t cols() const { return m_n_cols; }
@@ -82,6 +82,8 @@ public:
 
 	matrix<T>& transpose();
 	matrix<T>  get_transpose() const;
+	matrix<T>& resize(size_t m, size_t n);
+	matrix<T>& fill(const T& val);
 
 	/** returns a nxn identity matrix **/
 	static matrix<T> I(size_t n);
@@ -330,6 +332,41 @@ matrix<T> matrix<T>::get_transpose() const
 }
 
 template <typename T>
+matrix<T>& matrix<T>::resize(size_t m, size_t n)
+{
+	// xxx - throw if m == 0 || n == 0
+	const_cast<size_t &>(m_n_rows) = m;
+	const_cast<size_t &>(m_n_cols) = n;
+
+	// resizing the matrix re-initializes to column-major
+	// check for 1-based index (kinda icky)
+	std::auto_ptr<indexer> new_indexer;
+	if (c_begin() > 0)
+	{
+		assert(r_begin() == 0);
+		new_indexer.reset(new row_major_1_indexer(this));
+	}
+	else
+	{
+		assert(c_begin() == 0);
+		assert(r_begin() == 0);
+		new_indexer.reset(new row_major_indexer(this));
+	}
+	m_idx = new_indexer;
+	m_A = std::valarray<T>((T)0, m * n);
+
+	return *this;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::fill(const T& val)
+{
+	m_A = val;
+	return *this;
+}
+
+//static
+template <typename T>
 matrix<T> matrix<T>::I(size_t n)
 {
 	matrix<T> ident(n, n);
@@ -339,6 +376,7 @@ matrix<T> matrix<T>::I(size_t n)
 	return ident;
 }
 
+//static
 template <typename T>
 matrix<T> matrix<T>::diag(const std::valarray<T>& w)
 {
