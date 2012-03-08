@@ -75,6 +75,21 @@ void test_matrix()
 	}
 	assert(caught_exception);
 
+	matrix<double> E1(3, 3);
+	E1(0, 0) = 1.0;
+	E1(0, 1) = 2.0;
+	E1(0, 2) = 3.0;
+	E1(1, 0) = 4.0;
+	E1(1, 1) = 5.0;
+	E1(1, 2) = 6.0;
+	E1(2, 0) = 7.0;
+	E1(2, 1) = 8.0;
+	E1(2, 2) = 9.0;
+	matrix<double> E2 = E1;
+	assert(E1 == E2);
+	assert(E2 == E1);
+	assert(E1 != E2.transpose());
+
 	matrix<double> M4 = M1 + M2;
 	assert(M4 == M1 * 2.0);
 

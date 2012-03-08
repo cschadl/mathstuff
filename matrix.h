@@ -278,10 +278,10 @@ bool matrix<T>::operator==(const matrix<T>& rhs) const
 	if (m_n_rows != rhs.m_n_rows || m_n_cols != rhs.m_n_cols)
 		return false;
 
-	// xxx - busted
-	for (size_t i = 0 ; i < rhs.n_entries() ; i++)
-		if (m_A[i] != rhs.m_A[i])
-			return false;
+	for (size_t i = 0 ; i < m_n_rows ; i++)
+		for (size_t j = 0 ; j < m_n_cols ; j++)
+			if ((*this)(i, j) != rhs(i, j))
+				return false;
 
 	return true;
 }
