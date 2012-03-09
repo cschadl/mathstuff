@@ -135,7 +135,7 @@ void test_matrix()
 	Msvd(1,2) = 3.0;
 	Msvd(3,1) = 4.0;
 	matrix<double> M_ = Msvd;
-	Msvd.svd(w, VTsvd);
+	assert(Msvd.svd(w, VTsvd));
 	cout << "Msvd: " << endl << Msvd << endl;
 	cout << "w: " << endl;
 	for (size_t i = 0 ; i < w.size() ; i++) std::cout << w[i] << " ";
@@ -163,7 +163,7 @@ void test_matrix()
 
 	matrix<double> V(2, 2);
 	std::valarray<double> w2;
-	Ssvd.svd(w2, V);
+	assert(Ssvd.svd(w2, V));
 	cout << "Ssvd: " << endl << Ssvd << endl;
 	cout << "w: " << endl;
 	for (size_t i = 0 ; i < w2.size() ; i++) std::cout << w2[i] << " ";

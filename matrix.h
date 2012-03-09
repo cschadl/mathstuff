@@ -91,14 +91,17 @@ public:
 	/** create a nxn matrix whose diagonal entries are w **/
 	static matrix<T> diag(const std::valarray<T>& w);
 
-	/**
-	 * Compute the singular value decomposition A = U*W*Vt of this matrix.
-	 * The entries of this matrix are replaced with U, w is a vector whose
-	 * entries are the diagonal elements of the m x m matrix W.
-	 * V is returned rather than Vt.
-	 * (Adapted from Numerical Recipes in C, sec. 2.6)
+	/** Compute the singular value decomposition A = U*W*Vt of this matrix.
+	 *  The entries of a are replaced with U, w is a vector whose
+	 *  entries are the diagonal elements of the m x m matrix W.
+	 *  V is returned rather than Vt.
 	 */
-	matrix<T>& svd(std::valarray<T>& w, matrix<T>& V);
+	static bool svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V);
+
+	/**
+	 * Calls static svd() function with *this as A matrix.
+	 */
+	bool svd(std::valarray<T>& w, matrix<T>& V);
 
 	const T& operator()(size_t i, size_t j) const;
 	T& operator()(size_t i, size_t j);

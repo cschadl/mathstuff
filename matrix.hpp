@@ -1,3 +1,5 @@
+// see matrix.h
+
 namespace maths
 {
 
@@ -151,22 +153,24 @@ matrix<T> matrix<T>::diag(const std::valarray<T>& w)
 	return d;
 }
 
+// static
 template <typename T>
-matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
+bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 {
-	scoped_index_change this_index(*this, m_idx->make_one());	// used one-based indexing for this algorithm
+	scoped_index_change this_index(a, a.m_idx->make_one());	// used one-based indexing for this algorithm
 
-	const size_t m = rows();
-	const size_t n = cols();
+	const size_t m = a.rows();
+	const size_t n = a.cols();
 
+	// re-initialize w and V, make sure they're the correct size.
+	// (maybe just fill() here if their size is compatible)
 	w = std::valarray<T>((T)0, n);
-	V = matrix<T>(n, n);	// not transposed until the very end of the algorithm
+	V = matrix<T>(n, n);
+
 	scoped_index_change Vt_index(V, V.m_idx->make_one());	// make sure V is indexed 1..n
 
 	matrix<T> rv1(1, n);
 	rv1.set_index_type(RowMajorOne);
-
-	matrix<T>& a = *this;	// little bit less ugly. TODO - add static svd(), pass *this, or copy
 
 	size_t i, its, j, jj, k, l, nm;
 	T anorm, c, f, g, h, s, scale, x, y, z;
@@ -186,7 +190,7 @@ matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 			for (k = i ; k <= m ; k++)
 				scale += abs(a(k, i));
 
-			if (scale != 0.0)	// epsilon?
+			if (scale != 0.0)
 			{
 				for (k = i ; k <= m ; k++)
 				{
@@ -223,7 +227,7 @@ matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 			for (k = l ; k <= n ; k++)
 				scale += abs(a(i, k));
 
-			if (scale != 0.0)	// epsilon?
+			if (scale != 0.0)
 			{
 				for (k = l ; k <= n ; k++)
 				{
@@ -335,6 +339,9 @@ matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 				// NRC typecasts this sum before comparing for some reason
 				if ((abs(rv1(1, l)) + anorm) == anorm)
 				{
+					// I think these tests for 0.0 + anorm can
+					// be improved by taking a small epsilon value
+					// into account (improved convergence)
 					flag = false;
 					break;
 				}
@@ -387,11 +394,8 @@ matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 				break;
 			}
 
-			if (its == MAX_SVD_ITS)
-			{
-				// no convergence
-				assert(false);	// xxx - fix this
-			}
+			if (its == MAX_SVD_ITS)	// didn't converge :(
+				return false;
 
 			nm = k - 1;
 			assert(nm >= 1);
@@ -456,7 +460,13 @@ matrix<T>& matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 		}
 	}
 
-	return a;
+	return true;
+}
+
+template <typename T>
+bool matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
+{
+	return svd(*this, w, V);
 }
 
 template <typename T>
