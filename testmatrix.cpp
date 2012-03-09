@@ -122,7 +122,6 @@ void test_matrix()
 	// But, we should be able to multiply it by it's transpose
 	matrix<double> C1 = C;
 	matrix<double> Ct = C1.get_transpose();
-	C1.set_index_type(matrix<double>::RowMajorOne);	// make things a little more difficult...
 	std::cout << "C: " << endl << C << endl;
 	matrix<double> D = C1 * Ct;
 	cout << "D: " << endl << setprecision(20) << D << endl;

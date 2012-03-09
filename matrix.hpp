@@ -170,7 +170,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	scoped_index_change Vt_index(V, V.m_idx->make_one());	// make sure V is indexed 1..n
 
 	matrix<T> rv1(1, n);
-	rv1.set_index_type(RowMajorOne);
+	rv1.m_idx = std::auto_ptr<indexer>(new row_major_1_indexer(&rv1));
 
 	size_t i, its, j, jj, k, l, nm;
 	T anorm, c, f, g, h, s, scale, x, y, z;

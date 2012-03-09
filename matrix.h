@@ -187,36 +187,6 @@ protected:
 		virtual indexer* make_zero() const { return new col_major_indexer(this->mp); }
 		virtual indexer* make_one() const { return clone(this->mp); }
 	};
-public:
-	// for testing
-	enum IndexType
-	{
-		RowMajor,
-		ColMajor,
-		RowMajorOne,
-		ColMajorOne,
-	};
-
-	void set_index_type(const enum IndexType t)
-	{
-		switch (t)
-		{
-		case RowMajor:
-			m_idx = std::auto_ptr<indexer>(new row_major_indexer(this));
-			break;
-		case ColMajor:
-			m_idx = std::auto_ptr<indexer>(new col_major_indexer(this));
-			break;
-		case RowMajorOne:
-			m_idx = std::auto_ptr<indexer>(new row_major_1_indexer(this));
-			break;
-		case ColMajorOne:
-			m_idx = std::auto_ptr<indexer>(new col_major_1_indexer(this));
-			break;
-		default:
-			assert(false);
-		}
-	}
 
 protected:
 
