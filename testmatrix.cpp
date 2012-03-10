@@ -45,6 +45,14 @@ void test_matrix()
 	B(2, 0) = 8.0;
 	B(2, 1) = 5.0;
 
+	matrix<double> A1t = A;
+	A1t += A;
+	matrix<double> A2t = A;
+	A2t *= 2.0;
+	assert(A1t == A2t);
+	matrix<double> A3t = A;
+	assert((A3t *= B) == (A * B));
+
 	matrix<double> C(4, 2);
 	C(0, 0) = 273.0;
 	C(0, 1) = 455.0;

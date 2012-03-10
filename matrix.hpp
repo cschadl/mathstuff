@@ -30,10 +30,15 @@ matrix<T>::matrix(const matrix<T>& rhs)
 template <typename T>
 matrix<T>& matrix<T>::operator=(const matrix<T>& rhs)
 {
-	if (m_n_rows != rhs.m_n_rows || m_n_cols != rhs.m_n_cols)
-		throw matrix_dimension_mismatch_exception<T>(*this, rhs);
-
+	// We used to check that rhs had the same dimension as *this
+	// and throw an exception if that wasn't the case.  But, this
+	// broke A *= B, and also seemed awkward in some situations,
+	// so we no longer do that.
+	// I'm still a bit iffy on this.
+	const_cast<size_t&>(m_n_rows) = rhs.m_n_rows;
+	const_cast<size_t&>(m_n_cols) = rhs.m_n_cols;
 	m_A = rhs.m_A;
+	m_idx.reset(rhs.m_idx->clone(this));
 
 	return *this;
 }

@@ -109,6 +109,15 @@ public:
 	const T& operator()(size_t i, size_t j) const;
 	T& operator()(size_t i, size_t j);
 
+	// TODO - operators that take matrix rhs are inefficient
+	matrix<T>& operator+=(const matrix<T>& rhs) { *this = *this + rhs; return *this; }
+	matrix<T>& operator+=(const T& c) { m_A += c; return *this; }
+	matrix<T>& operator-=(const matrix<T>& rhs) { *this = *this - rhs; return *this; }
+	matrix<T>& operator-=(const T& c) { m_A -= c; return *this; }
+	matrix<T>& operator*=(const matrix<T>& rhs) { *this = *this * rhs; return *this; }
+	matrix<T>& operator*=(const T& c) { m_A *= c; return *this; }
+	matrix<T>& operator/=(const T& d) { m_A /= d; return *this; }
+
 	template <typename _T>
 	friend matrix<_T> operator*(const matrix<_T>& a, const matrix<_T>& b);
 
