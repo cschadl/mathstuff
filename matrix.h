@@ -106,8 +106,8 @@ public:
 	// These make implementing e.g. a 'diagonal matrix' subclass
 	// very awkward (how do  we access off-diagonal elements?)
 	// It might be better to have operator[] return an inner 'row' class
-	const T& operator()(size_t i, size_t j) const;
-	T& operator()(size_t i, size_t j);
+	virtual const T& operator()(size_t i, size_t j) const;
+	virtual T& operator()(size_t i, size_t j);
 
 	// TODO - operators that take matrix rhs are inefficient
 	matrix<T>& operator+=(const matrix<T>& rhs) { *this = *this + rhs; return *this; }
@@ -222,6 +222,12 @@ protected:
 			mp.m_idx = std::auto_ptr<indexer>(orig_index.release());
 		}
 	};
+};
+
+template <typename T>
+class diag_matrix : public matrix<T>
+{
+
 };
 
 };

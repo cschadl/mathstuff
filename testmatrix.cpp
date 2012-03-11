@@ -115,6 +115,26 @@ void test_matrix()
 	matrix<double> M6 = M1 - M2;
 	assert(M6 == matrix<double>(M1.rows(), M1.cols()));
 
+	double u = 0.0;
+	matrix<double> M7(3, 3);
+	for (size_t i = 0 ; i < 3 ; i++)
+		for (size_t j = 0 ; j < 3 ; j++)
+			M7(i, j) = ++u;
+	matrix<double> M7sum = M7 + M7;
+	assert(M7sum == M7 * 2.0);
+	matrix<double> M7Tsum = M7 + M7.get_transpose();
+	matrix<double> eM7Tsum(3, 3);
+	eM7Tsum(0, 0) = 2.0;
+	eM7Tsum(0, 1) = 6.0;
+	eM7Tsum(0, 2) = 10.0;
+	eM7Tsum(1, 0) = 6.0;
+	eM7Tsum(1, 1) = 10.0;
+	eM7Tsum(1, 2) = 14.0;
+	eM7Tsum(2, 0) = 10.0;
+	eM7Tsum(2, 1) = 14.0;
+	eM7Tsum(2, 2) = 18.0;
+	assert(M7Tsum == eM7Tsum);
+
 	// We can't multiply C by itself
 	bool caught_exception2 = false;
 	try

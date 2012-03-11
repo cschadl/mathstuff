@@ -561,11 +561,13 @@ matrix<_T> operator+(const matrix<_T>& a, const matrix<_T>& b)
 	if (a.rows() != b.rows() || a.cols() != b.cols())
 		throw matrix_dimension_mismatch_exception<_T>(a, b);
 
-	// xxx for this and operator-, what if the matrices
-	// are the same size, but one is transposed?
-	// Better just add item by item
 	matrix<_T> c(a.rows(), a.cols());
-	c.m_A = a.m_A + b.m_A;
+
+	typename matrix<_T>::scoped_index_change ai(a, a.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change bi(b, b.m_idx->make_zero());
+	for (size_t i = 0 ; i < a.rows() ; i++)
+		for (size_t j = 0 ; j < b.cols() ; j++)
+			c(i, j) = a(i, j) + b(i, j);
 
 	return c;
 }
@@ -578,7 +580,12 @@ matrix<_T> operator-(const matrix<_T>& a, const matrix<_T>& b)
 		throw matrix_dimension_mismatch_exception<_T>(a, b);
 
 	matrix<_T> c(a.rows(), a.cols());
-	c.m_A = a.m_A - b.m_A;
+
+	typename matrix<_T>::scoped_index_change ai(a, a.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change bi(b, b.m_idx->make_zero());
+	for (size_t i = 0 ; i < a.rows() ; i++)
+		for (size_t j = 0 ; j < b.cols() ; j++)
+			c(i, j) = a(i, j) - b(i, j);
 
 	return c;
 }
