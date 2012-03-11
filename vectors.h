@@ -16,8 +16,6 @@
 
 #include "misc.h"
 
-extern void test_vector();
-
 namespace maths
 {
 
