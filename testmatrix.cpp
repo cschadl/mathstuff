@@ -219,7 +219,7 @@ namespace tut
 	{
 		set_test_name("SVD test 2");
 
-		matrix<double> A(4, 2);
+		matrix<float> A(4, 2);
 		A(0, 0) = 2.0;
 		A(0, 1) = 4.0;
 		A(1, 0) = 1.0;
@@ -228,21 +228,21 @@ namespace tut
 	//	A(2, 1) = 3.6;
 	//	A(3, 0) = 1.7;
 	//	A(3, 1) = 2.8;
-		matrix<double> S_ = A;
+		matrix<float> S_ = A;
 
-		matrix<double> V(2, 2);
-		std::valarray<double> w;
+		matrix<float> V(2, 2);
+		std::valarray<float> w;
 		ensure(A.svd(w, V));
 		// The "compact" SVD that .svd() returns apparently does not necessarily
 		// have the attribute that S * St = I or V * Vt = I...
 		// GNU Octave seems to agree with the results that matrix::svd() returns,
 		// and we can still always reconstruct the matrix...
 
-		//ensure((A * A.get_transpose()).is_close(matrix<double>::I(A.rows()), 1.0e-8));
-		//ensure((V * V.get_transpose()).is_close(matrix<double>::I(A.cols()), 1.0e-8));
-		std::auto_ptr< const diag_matrix<double > > pDw2(matrix<double>::diag(w));
-		const diag_matrix<double>& Dw2 = *pDw2;
-		matrix<double> R2 = A * Dw2 * V.get_transpose();
-		ensure(S_.is_close(R2, 1.0e-14));
+		//ensure((A * A.get_transpose()).is_close(matrix<float>::I(A.rows()), 1.0e-8));
+		//ensure((V * V.get_transpose()).is_close(matrix<float>::I(A.cols()), 1.0e-8));
+		std::auto_ptr< const diag_matrix<float > > pDw2(matrix<float>::diag(w));
+		const diag_matrix<float>& Dw2 = *pDw2;
+		matrix<float> R2 = A * Dw2 * V.get_transpose();
+		ensure(S_.is_close(R2, 1.0e-6));
 	}
 };

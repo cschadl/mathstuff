@@ -22,6 +22,7 @@ T abs(T x)
 	return x < 0 ? -x : x;
 }
 
+// do I really have to use template specialization for this?
 template<>
 inline
 double abs(double x)
@@ -35,6 +36,23 @@ inline
 float abs(float x)
 {
 	return fabs(x);
+}
+
+template <typename T>
+T sqrt(T x);
+
+template <>
+inline
+double sqrt(double x)
+{
+	return ::sqrt(x);
+}
+
+template <>
+inline
+float sqrt(float x)
+{
+	return ::sqrtf(x);
 }
 
 /**
