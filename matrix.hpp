@@ -711,46 +711,28 @@ protected:
 	const size_t num_cols;
 	const size_t req_i;
 	const size_t req_j;
+	const size_t row_start;
+	const size_t row_end;
+	const size_t col_start;
+	const size_t col_end;
 public:
-	// TODO - busted
 	matrix_index_exception(const matrix<T>* m, size_t i, size_t j)
 	: num_rows(m->rows())
 	, num_cols(m->cols())
 	, req_i(i)
 	, req_j(j)
+	, row_start(m->r_begin())
+	, row_end(m->r_end())
+	, col_start(m->c_begin())
+	, col_end(m->c_end())
 	{
-		assert(req_i >= num_rows || req_j >= num_cols);
+
 	}
 
 	virtual std::string what() const
 	{
 		std::stringstream ss;
-		if (req_i >= num_rows && req_j < num_cols)
-		{
-			ss << "Element (" << req_i << ", " << req_j << " )"
-				<< "has invalid row (max row is " << num_rows - 1;
-		}
-		else if (req_i < num_rows && req_j >= num_cols)
-		{
-			ss << "Element (" << req_i << ", " << req_j << " )"
-				<< "has invalid column (max column is " << num_cols - 1;
-		}
-		else if (req_i >= num_rows && req_j >= num_cols)
-		{
-			ss << "Element (" << req_i << ", " << req_j << " )"
-				<< "invalid (max row " << num_rows - 1
-				<< ", max col " << num_cols - 1;
-		}
-		else
-		{
-			ss << "INVALID EXCEPTION!"
-				<< " (i " << req_i
-				<< ", j " << req_j
-				<< ", num_rows " << num_rows
-				<< ", num_cols " << num_cols
-				<< " )";
-		}
-
+		ss << "Bad index: (" << req_i << ", " << req_j << ")";
 		return ss.str();
 	}
 };

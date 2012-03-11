@@ -224,11 +224,11 @@ namespace tut
 		A(0, 1) = 4.0;
 		A(1, 0) = 1.0;
 		A(1, 1) = 3.0;
-	//	A(2, 0) = 2.5;	// these should work, too...
-	//	A(2, 1) = 3.6;
-	//	A(3, 0) = 1.7;
-	//	A(3, 1) = 2.8;
-		matrix<float> S_ = A;
+		A(2, 0) = 2.5;	// these should work, too...
+		A(2, 1) = 3.6;
+		A(3, 0) = 1.7;
+		A(3, 1) = 2.8;
+		matrix<float> A1 = A;
 
 		matrix<float> V(2, 2);
 		std::valarray<float> w;
@@ -240,9 +240,9 @@ namespace tut
 
 		//ensure((A * A.get_transpose()).is_close(matrix<float>::I(A.rows()), 1.0e-8));
 		//ensure((V * V.get_transpose()).is_close(matrix<float>::I(A.cols()), 1.0e-8));
-		std::auto_ptr< const diag_matrix<float > > pDw2(matrix<float>::diag(w));
-		const diag_matrix<float>& Dw2 = *pDw2;
-		matrix<float> R2 = A * Dw2 * V.get_transpose();
-		ensure(S_.is_close(R2, 1.0e-6));
+		std::auto_ptr< const diag_matrix<float > > pDw(matrix<float>::diag(w));
+		const diag_matrix<float>& Dw = *pDw;
+		matrix<float> R1 = A * Dw * V.get_transpose();
+		ensure(A1.is_close(R1, 1.0e-5));	// we get kind of lousy results using floating point arithmetic here...
 	}
 };
