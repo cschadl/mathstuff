@@ -28,6 +28,8 @@ template <typename T> class matrix_index_exception;
 template <typename T> class matrix_dimension_mismatch_exception;
 class invalid_matrix_exception;
 
+template <typename T> class diag_matrix;
+
 template <typename T>
 class matrix
 {
@@ -60,6 +62,9 @@ protected:
 	std::valarray<T>				m_A;	// matrix entries
 	mutable std::auto_ptr<indexer>	m_idx;	// should be a unique_ptr.  never NULL.
 
+	/** Protected constructor for subclasses (e.g. diag_matrix) */
+	matrix(size_t m, size_t n, const std::valarray<T>& A, indexer* idx);
+
 	virtual size_t _idx(size_t i, size_t j) const {  return m_idx->index(i, j); }
 
 public:
@@ -67,6 +72,8 @@ public:
 
 	matrix(const matrix<T>& rhs);
 	matrix<T>& operator=(const matrix<T>& rhs);
+
+	virtual ~matrix() { }
 
 	size_t rows() const { return m_n_rows; }
 	size_t cols() const { return m_n_cols; }
@@ -82,14 +89,16 @@ public:
 
 	matrix<T>& transpose();
 	matrix<T>  get_transpose() const;
-	matrix<T>& resize(size_t m, size_t n);
-	matrix<T>& fill(const T& val);
+	virtual matrix<T>& resize(size_t m, size_t n);
+	virtual matrix<T>& fill(const T& val);
 
 	/** returns a nxn identity matrix **/
 	static matrix<T> I(size_t n);
 
-	/** create a nxn matrix whose diagonal entries are w **/
-	static matrix<T> diag(const std::valarray<T>& w);
+	/** create an nxn diagonal matrix
+	 *  (pointer, because it must be const)
+	 */
+	static const diag_matrix<T>* diag(const std::valarray<T>& d);
 
 	/** Compute the singular value decomposition A = U*W*Vt of this matrix.
 	 *  The entries of a are replaced with U, w is a vector whose
@@ -110,13 +119,13 @@ public:
 	virtual T& operator()(size_t i, size_t j);
 
 	// TODO - operators that take matrix rhs are inefficient
-	matrix<T>& operator+=(const matrix<T>& rhs) { *this = *this + rhs; return *this; }
-	matrix<T>& operator+=(const T& c) { m_A += c; return *this; }
-	matrix<T>& operator-=(const matrix<T>& rhs) { *this = *this - rhs; return *this; }
-	matrix<T>& operator-=(const T& c) { m_A -= c; return *this; }
-	matrix<T>& operator*=(const matrix<T>& rhs) { *this = *this * rhs; return *this; }
-	matrix<T>& operator*=(const T& c) { m_A *= c; return *this; }
-	matrix<T>& operator/=(const T& d) { m_A /= d; return *this; }
+	virtual matrix<T>& operator+=(const matrix<T>& rhs) { *this = *this + rhs; return *this; }
+	virtual matrix<T>& operator+=(const T& c) { m_A += c; return *this; }
+	virtual matrix<T>& operator-=(const matrix<T>& rhs) { *this = *this - rhs; return *this; }
+	virtual matrix<T>& operator-=(const T& c) { m_A -= c; return *this; }
+	virtual matrix<T>& operator*=(const matrix<T>& rhs) { *this = *this * rhs; return *this; }
+	virtual matrix<T>& operator*=(const T& c) { m_A *= c; return *this; }
+	virtual matrix<T>& operator/=(const T& d) { m_A /= d; return *this; }
 
 	template <typename _T>
 	friend matrix<_T> operator*(const matrix<_T>& a, const matrix<_T>& b);
@@ -224,10 +233,67 @@ protected:
 	};
 };
 
+/**
+ * An n x n diagonal matrix
+ */
 template <typename T>
 class diag_matrix : public matrix<T>
 {
+protected:
+	const T m_off_diag_element;	// probably 0
+	T m_quit_bitching;
 
+	class diag_matrix_indexer : public matrix<T>::indexer
+	{
+	public:
+		diag_matrix_indexer(const diag_matrix<T>* m) : matrix<T>::indexer(m) { }
+		virtual size_t index(size_t i, size_t j) const { return (i == j) ? i : -1; }
+		virtual size_t row_index_start() const { return 0; }
+		virtual size_t row_index_end() const { return this->mp->rows(); }
+		virtual size_t col_index_start() const { return 0; }
+		virtual size_t col_index_end() const { return this->mp->cols(); }
+		virtual typename matrix<T>::indexer* clone(const matrix<T>* m) const;
+		virtual typename matrix<T>::indexer* make_transpose() const { return clone(this->mp); }
+		virtual typename matrix<T>::indexer* make_zero() const { return clone(this->mp); }
+		virtual typename matrix<T>::indexer* make_one() const;
+	};
+
+	class diag_matrix_1_indexer : public matrix<T>::indexer
+	{
+	public:
+		diag_matrix_1_indexer(const diag_matrix<T>* m) : matrix<T>::indexer(m) { }
+		virtual size_t index(size_t i, size_t j) const { assert(i > 0 && j > 0); return (i == j) ? i - 1 : -1; }
+		virtual size_t row_index_start() const { return 1; }
+		virtual size_t row_index_end() const { return this->mp->rows() + 1; }
+		virtual size_t col_index_start() const { return 1; }
+		virtual size_t col_index_end() const { return this->mp->cols() + 1; }
+		virtual typename matrix<T>::indexer* clone(const matrix<T>* m) const;
+		virtual typename matrix<T>::indexer* make_transpose() const { return clone(this->mp); }
+		virtual typename matrix<T>::indexer* make_zero() const;
+		virtual typename matrix<T>::indexer* make_one() const { return clone(this->mp); }
+	};
+
+	diag_matrix(const std::valarray<T>& d);	// new diagonal matrix with entries of D as elements
+
+private:
+	// This class should not be used in a non-const context
+	virtual T& operator()(size_t m, size_t n) { assert(false); return m_quit_bitching; }
+	diag_matrix<T>& operator=(const diag_matrix<T>& rhs) { assert(false); return *this; }
+	diag_matrix(const diag_matrix<T>& rhs) { }
+	virtual matrix<T>& operator+=(const matrix<T>& rhs) { assert(false); return *this; }
+	virtual matrix<T>& operator+=(const T& c) { assert(false); return *this; }
+	virtual matrix<T>& operator-=(const matrix<T>& rhs) { assert(false); return *this; }
+	virtual matrix<T>& operator-=(const T& c) { assert(false); return *this; }
+	virtual matrix<T>& operator*=(const matrix<T>& rhs) { assert(false); return *this; }
+	virtual matrix<T>& operator*=(const T& c) { assert(false); return *this; }
+	virtual matrix<T>& operator/=(const T& d) { assert(false); return *this; }
+	virtual matrix<T>& resize(size_t m, size_t n) { assert(false); return *this; }
+	virtual matrix<T>& fill(const T& val) { assert(false); return *this; }
+
+public:
+	virtual const T& operator()(size_t i, size_t j) const;
+
+	friend class matrix<T>;
 };
 
 };

@@ -28,6 +28,16 @@ matrix<T>::matrix(const matrix<T>& rhs)
 }
 
 template <typename T>
+matrix<T>::matrix(size_t m, size_t n, const std::valarray<T>& A, matrix<T>::indexer* idx)
+: m_n_rows(m)
+, m_n_cols(n)
+, m_A(A)
+, m_idx(idx)
+{
+
+}
+
+template <typename T>
 matrix<T>& matrix<T>::operator=(const matrix<T>& rhs)
 {
 	// We used to check that rhs had the same dimension as *this
@@ -147,15 +157,9 @@ matrix<T> matrix<T>::I(size_t n)
 
 //static
 template <typename T>
-matrix<T> matrix<T>::diag(const std::valarray<T>& w)
+const diag_matrix<T>* matrix<T>::diag(const std::valarray<T>& w)
 {
-	const size_t n = w.size();	assert(n > 0);
-	matrix<T> d(n, n);
-
-	for (size_t i = 0 ; i < n ; i++)
-		d(i, i) = w[i];
-
-	return d;
+	return new diag_matrix<T>(w);
 }
 
 // static
@@ -615,6 +619,63 @@ std::ostream& operator<<(std::ostream& os, const matrix<_T>& m)
 	}
 
 	return os;
+}
+
+//////////////////////////////////////////////
+// diag_matrix
+template <typename T>
+diag_matrix<T>::diag_matrix(const std::valarray<T>& d)
+: matrix<T>(d.size(), d.size(), d, new typename diag_matrix<T>::diag_matrix_indexer(this))
+, m_off_diag_element((T)0)
+, m_quit_bitching((T)0)
+{
+
+}
+
+template <typename T>
+const T& diag_matrix<T>::operator()(size_t i, size_t j) const
+{
+	const size_t _idx = this->m_idx->index(i, j);
+	if (_idx == (size_t)-1)
+		return m_off_diag_element;
+
+	return this->m_A[_idx];
+}
+
+template <typename T>
+typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_indexer::clone(const matrix<T>* m) const
+{
+	const diag_matrix<T>* dm = dynamic_cast< const diag_matrix<T>* >(m);
+	assert(dm);
+
+	return new diag_matrix_indexer(dm);
+}
+
+template <typename T>
+typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_indexer::make_one() const
+{
+	const diag_matrix<T>* dm = dynamic_cast< const diag_matrix<T>* >(this->mp);
+	assert(dm);
+
+	return new diag_matrix_1_indexer(dm);
+}
+
+template <typename T>
+typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_1_indexer::clone(const matrix<T>* m) const
+{
+	const diag_matrix<T>* dm = dynamic_cast< const diag_matrix<T>* >(m);
+	assert(dm);
+
+	return new diag_matrix_1_indexer(dm);
+}
+
+template <typename T>
+typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_1_indexer::make_zero() const
+{
+	const diag_matrix<T>* dm = dynamic_cast< const diag_matrix<T>* >(this->mp);
+	assert(dm);
+
+	return new diag_matrix_indexer(dm);
 }
 
 class matrix_exception

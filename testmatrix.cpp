@@ -8,8 +8,10 @@
 #include "matrix.h"
 
 #include <iomanip>
+#include <memory>
 
 using maths::matrix;
+using maths::diag_matrix;
 using maths::matrix_exception;
 using std::cout;
 using std::setprecision;
@@ -172,7 +174,10 @@ void test_matrix()
 	     << "V * Vt" << endl << VTsvd * VTsvd.get_transpose() << endl;
 	assert((Msvd * Msvd.get_transpose()).is_close(matrix<double>::I(Msvd.rows()), 1.0e-12));
 	assert((VTsvd * VTsvd.get_transpose()).is_close(matrix<double>::I(Msvd.cols()), 1.0e-12));
-	matrix<double> R1 = Msvd * matrix<double>::diag(w) * VTsvd.get_transpose();
+	std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
+	const diag_matrix<double>& Dw = *pDw;
+	cout << "Dw: " << endl << Dw << endl;
+	matrix<double> R1 = Msvd * Dw * VTsvd.get_transpose();
 	cout << "R1: " << endl << setprecision(12) << R1 << endl;
 	assert(M_.is_close(R1, 1.0e-15));
 
@@ -205,7 +210,9 @@ void test_matrix()
 
 	//assert((Ssvd * Ssvd.get_transpose()).is_close(matrix<double>::I(Ssvd.rows()), 1.0e-8));
 	//assert((V * V.get_transpose()).is_close(matrix<double>::I(Ssvd.cols()), 1.0e-8));
-	matrix<double> R2 = Ssvd * matrix<double>::diag(w2) * V.get_transpose();
+	std::auto_ptr< const diag_matrix<double > > pDw2(matrix<double>::diag(w2));
+	const diag_matrix<double>& Dw2 = *pDw2;
+	matrix<double> R2 = Ssvd * Dw2 * V.get_transpose();
 	cout << "R2: " << endl << R2 << endl;
 	assert(S_.is_close(R2, 1.0e-14));
 
