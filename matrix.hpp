@@ -135,7 +135,7 @@ matrix<T>& matrix<T>::resize(size_t m, size_t n)
 	const_cast<size_t &>(m_n_rows) = m;
 	const_cast<size_t &>(m_n_cols) = n;
 
-	// resizing the matrix re-initializes to column-major
+	// resizing the matrix re-initializes to row-major
 	// check for 1-based index (kinda icky)
 	std::auto_ptr<indexer> new_indexer;
 	if (c_begin() > 0)
