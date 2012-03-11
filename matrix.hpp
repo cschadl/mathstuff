@@ -37,6 +37,24 @@ matrix<T>::matrix(size_t m, size_t n, const std::valarray<T>& A, matrix<T>::inde
 
 }
 
+/**
+ * Constructor that takes a pointer to an array as elements
+ * Entries are considered column-major (e.g. for OpenGL)
+ * The number of elements in cols[] must be m * n
+ */
+template <typename T>
+matrix<T>::matrix(const T* cols, size_t m, size_t n)
+: m_n_rows(m)
+, m_n_cols(n)
+, m_A(cols, m * n)
+, m_idx(new col_major_indexer(this))
+{
+	if (m_n_rows < 1 || m_n_cols < 1)
+		throw invalid_matrix_exception();
+
+	assert(m_A.size() > 0);
+}
+
 template <typename T>
 matrix<T>& matrix<T>::operator=(const matrix<T>& rhs)
 {

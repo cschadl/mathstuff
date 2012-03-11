@@ -69,7 +69,7 @@ protected:
 
 public:
 	explicit matrix(size_t m, size_t n);
-
+	explicit matrix(const T* cols, size_t m, size_t n);
 	matrix(const matrix<T>& rhs);
 	matrix<T>& operator=(const matrix<T>& rhs);
 
