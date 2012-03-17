@@ -67,4 +67,19 @@ namespace tut
 		ensure(maths::close(v.length_sq(), 1.0, 1.0e-15));
 		ensure(v.length() == 1.0);
 	}
+
+	template <> template <>
+	void vector_tests::object::test<3>()
+	{
+		set_test_name("arithmetic");
+
+		vector3d v1(0.0, 0.5, 0.0);
+		vector3d v2(0.5, 0.0, 0.0);
+		vector3d v3(0.0, 0.0, 0.5);
+
+		const double tol = 1.0e-64;
+		ensure((v1 + v2).is_close(vector3d(0.5, 0.5, 0.0), tol));
+		ensure((v2 + v2).is_close(vector3d(1.0, 0.0, 0.0), tol));
+		ensure(((v1 + v2) - v2).is_close(v1, tol));
+	}
 };

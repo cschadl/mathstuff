@@ -70,19 +70,14 @@ T& quaternion<T>::operator[](size_t n)
 template <typename T>
 quaternion<T> quaternion<T>::get_conj() const
 {
-//	const quaternion<T>& q = *this;
-//	const quaternion<T>  i = quaternion<T>::i();
-//	const quaternion<T>  j = quaternion<T>::j();
-//	const quaternion<T>  k = quaternion<T>::k();
-//
-//	return -0.5 * ((i*q*i) + (j*q*j) + (k*q*k));
-	return a() - bi() - cj() - dk();
+	return quaternion<T>(m_scalar, -m_vector[0], -m_vector[1], -m_vector[2]);
 }
 
 template <typename T>
 quaternion<T>& quaternion<T>::conj()
 {
-	*this = get_conj();
+	m_vector *= -1.0;
+	return *this;
 }
 
 template <typename T>
@@ -94,7 +89,9 @@ quaternion<T> quaternion<T>::get_unit() const
 template <typename T>
 quaternion<T>& quaternion<T>::unit()
 {
+	// xxx - poo
 	*this = get_unit();
+	return *this;
 }
 
 template <typename T>
@@ -107,6 +104,7 @@ template <typename T>
 quaternion<T>& quaternion<T>::reciprocal()
 {
 	*this = get_reciprocal();
+	return *this;
 }
 
 template <typename T>
@@ -158,7 +156,7 @@ quaternion<_T> operator-(const quaternion<_T>& q1, const _T& a)
 template <typename _T>
 quaternion<_T> operator-(const _T& a, const quaternion<_T>& q1)
 {
-	return quaternion<_T>(a - q1.scalar_part(), q1.vector_part());
+	return quaternion<_T>(a - q1.scalar_part(), -q1.vector_part());
 }
 
 template <typename _T>

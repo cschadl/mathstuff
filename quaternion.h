@@ -46,9 +46,9 @@ public:
 	const T& b()  const { return m_vector[0]; }
 	const T& c()  const { return m_vector[1]; }
 	const T& d()  const { return m_vector[2]; }
-	const T& bi() const { return m_vector[0] * i(); }
-	const T& cj() const { return m_vector[1] * j(); }
-	const T& dk() const { return m_vector[2] * k(); }
+	quaternion<T> bi() const { return quaternion<T>((T)0, b(), (T)0, (T)0); }
+	quaternion<T> cj() const { return quaternion<T>((T)0, (T)0, c(), (T)0); }
+	quaternion<T> dk() const { return quaternion<T>((T)0, (T)0, (T)0, d()); }
 
 	quaternion<T>  get_conj() const;
 	quaternion<T>& conj();

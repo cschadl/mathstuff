@@ -51,4 +51,20 @@ namespace tut
 		ensure(ki.is_close(j, tol));
 		ensure(ik.is_close(-j, tol));
 	}
+
+	template <> template <>
+	void quaternion_tests::object::test<2>()
+	{
+		set_test_name("conjugate");
+
+		const quatd i = quatd::i();
+		const quatd j = quatd::j();
+		const quatd k = quatd::k();
+
+		const quatd q(1.0 / 3.0, 0.5, 1.0, 2.0 / 3.0);	// random crap
+		const quatd q_star = -0.5 * (q + (i*q*i) + (j*q*j) + (k*q*k));
+
+		ensure(q.get_conj().is_close(q_star, 1.0e-15));
+		ensure(q.get_conj().is_close(q.a() - q.bi() - q.cj() - q.dk(), 1.0e-15));
+	}
 };
