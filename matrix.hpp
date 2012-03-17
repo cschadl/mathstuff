@@ -140,7 +140,8 @@ matrix<T>& matrix<T>::resize(size_t m, size_t n)
 	std::auto_ptr<indexer> new_indexer;
 	if (c_begin() > 0)
 	{
-		assert(r_begin() == 0);
+		assert(c_begin() == 1);
+		assert(r_begin() == 1);
 		new_indexer.reset(new row_major_1_indexer(this));
 	}
 	else
