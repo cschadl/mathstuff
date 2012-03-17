@@ -263,7 +263,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 					s += a(i, k) * a(i, k);
 				}
 				f = a(i, l);
-				g = -sign(sqrt(s), f);	// xxx - doesn't work with float
+				g = -sign(sqrt(s), f);
 				h = f * g - s;
 				a(i, l) = f - g;
 
