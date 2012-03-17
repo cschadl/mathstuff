@@ -58,6 +58,7 @@ public:
 	bool operator!=(const n_vector<T, N>& rhs) const { return !(*this == rhs); }
 
 	bool is_close(const n_vector<T, N>& v, const T tol) const;
+	bool is_null(const T& tol = (T)0) const;
 
 	// Arithmetic operations
 	template<typename U, int M> friend n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
@@ -159,6 +160,12 @@ bool n_vector<T, N>::is_close(const n_vector<T, N>& v, const T tol) const
 			return false;
 
 	return true;
+}
+
+template <typename T, int N>
+bool n_vector<T, N>::is_null(const T& tol) const
+{
+	return is_close(n_vector<T, N>(), tol);
 }
 
 template <typename T, int N>
@@ -277,7 +284,7 @@ inline
 n_vector<U, 3> outer_product(const n_vector<U, 3>& v1, const n_vector<U, 3>& v2)
 {
 	const U n0 = (v1[1] * v2[2]) - (v1[2] * v2[1]);
-	const U n1 = (v1[3] * v2[0]) - (v1[0] * v2[2]);
+	const U n1 = (v1[2] * v2[0]) - (v1[0] * v2[2]);
 	const U n2 = (v1[0] * v2[1]) - (v1[1] * v2[0]);
 
 	return n_vector<U, 3>(n0, n1, n2);
