@@ -10,6 +10,7 @@
 #include <tut.h>
 
 using maths::quaternion;
+using maths::quatd;
 
 namespace tut
 {
@@ -22,20 +23,20 @@ namespace tut
 	{
 		set_test_name("basic arithmetic properties");
 
-		const quaternion<double> i = quaternion<double>::i();
-		const quaternion<double> j = quaternion<double>::j();
-		const quaternion<double> k = quaternion<double>::k();
+		const quatd i = quatd::i();
+		const quatd j = quatd::j();
+		const quatd k = quatd::k();
 
-		const quaternion<double> isq = i * i;
-		const quaternion<double> jsq = j * j;
-		const quaternion<double> ksq = k * k;
-		const quaternion<double> ijk = i * j * k;
-		const quaternion<double> ij = i * j;
-		const quaternion<double> ji = j * i;
-		const quaternion<double> jk = j * k;
-		const quaternion<double> kj = k * j;
-		const quaternion<double> ki = k * i;
-		const quaternion<double> ik = i * k;
+		const quatd isq = i * i;
+		const quatd jsq = j * j;
+		const quatd ksq = k * k;
+		const quatd ijk = i * j * k;
+		const quatd ij = i * j;
+		const quatd ji = j * i;
+		const quatd jk = j * k;
+		const quatd kj = k * j;
+		const quatd ki = k * i;
+		const quatd ik = i * k;
 
 		const double tol = 1.0e-64;
 		ensure(isq.is_close(-1.0, tol));

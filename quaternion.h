@@ -76,8 +76,8 @@ template <typename _T> quaternion<_T> operator*(const _T& c, const quaternion<_T
 template <typename _T> quaternion<_T> operator/(const quaternion<_T>& q, const _T& d);
 template <typename _T> quaternion<_T> operator-(const quaternion<_T>& q);
 
-typedef quaternion<double> quaternion_d;
-typedef quaternion<double> quaternion_f;
+typedef quaternion<double> quatd;
+typedef quaternion<double> quatf;
 
 };
 
