@@ -6,11 +6,14 @@
  */
 
 #include "quaternion.h"
+#include "misc.h"
 
 #include <tut.h>
 
 using maths::quaternion;
 using maths::quatd;
+using maths::close;
+using maths::sqrt;
 
 namespace tut
 {
@@ -62,9 +65,34 @@ namespace tut
 		const quatd k = quatd::k();
 
 		const quatd q(1.0 / 3.0, 0.5, 1.0, 2.0 / 3.0);	// random crap
-		const quatd q_star = -0.5 * (q + (i*q*i) + (j*q*j) + (k*q*k));
 
-		ensure(q.get_conj().is_close(q_star, 1.0e-15));
+		ensure(q.get_conj().is_close(-0.5 * (q + (i*q*i) + (j*q*j) + (k*q*k)), 1.0e-15));
 		ensure(q.get_conj().is_close(q.a() - q.bi() - q.cj() - q.dk(), 1.0e-15));
+	}
+
+	template <> template <>
+	void quaternion_tests::object::test<3>()
+	{
+		set_test_name("norm");
+
+		const quatd q(0.37865, 1.28747, -3.2847005, 1.0);	// more random crap...
+
+		const double qn = q.norm();
+		const quatd q_star_q = q * q.get_conj();
+		const quatd q_q_star = q.get_conj() * q;
+
+		// q_star_q, q_q_star should be scalar
+		ensure(q_star_q.vector_part().is_null(1.0e-15));
+		ensure(q_q_star.vector_part().is_null(1.0e-15));
+
+		ensure(close(qn, sqrt(q_star_q.scalar_part()), 1.0e-15));
+		ensure(close(qn, sqrt(q_q_star.scalar_part()), 1.0e-15));
+		ensure(close(qn, sqrt((q.a() * q.a()) + (q.b() * q.b()) + (q.c() * q.c()) + (q.d() * q.d())), 1.0e-15));
+
+		const double alpha = 0.5;
+		ensure(close((alpha * q).norm(), (alpha * q.norm()), 1.0e-15));
+
+		const quatd q1(8.27843, -2.359783, -1.84394, 5.28497);
+		ensure(close((q * q1).norm(), q.norm() * q1.norm(), 1.0e-12));	// tol a little looser due to sqrt()
 	}
 };
