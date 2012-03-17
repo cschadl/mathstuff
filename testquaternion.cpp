@@ -38,7 +38,7 @@ namespace tut
 		const quatd ki = k * i;
 		const quatd ik = i * k;
 
-		const double tol = 1.0e-64;
+		const double tol = 1.0e-128;
 		ensure(isq.is_close(-1.0, tol));
 		ensure(jsq.is_close(-1.0, tol));
 		ensure(ksq.is_close(-1.0, tol));
