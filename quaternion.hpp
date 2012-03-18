@@ -52,7 +52,7 @@ bool quaternion<T>::is_close(const quaternion<T>& rhs, const T& tol) const
 template <typename T>
 bool quaternion<T>::is_close(const T& a, const T& tol) const
 {
-	return close(scalar_part(), a, tol) && vector_part().is_null(tol);
+	return close(scalar_part(), a, tol) && vector_part().is_null();
 }
 
 template <typename T>
@@ -117,6 +117,24 @@ template <typename T>
 T quaternion<T>::norm_sq() const
 {
 	return (a()*a()) + (b()*b()) + (c()*c()) + (d()*d());
+}
+
+template <typename T>
+bool quaternion<T>::is_scalar() const
+{
+	return m_vector.is_null();
+}
+
+template <typename T>
+bool quaternion<T>::is_imaginary() const
+{
+	return maths::close(m_scalar, 0.0, std::numeric_limits<T>::epsilon());
+}
+
+template <typename T>
+bool quaternion<T>::is_null() const
+{
+	return is_scalar() && is_imaginary();
 }
 
 ///////////////

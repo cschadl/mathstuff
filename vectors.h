@@ -11,6 +11,7 @@
 #include <valarray>
 #include <cmath>
 #include <iostream>
+#include <limits>
 
 #include <assert.h>
 
@@ -58,7 +59,7 @@ public:
 	bool operator!=(const n_vector<T, N>& rhs) const { return !(*this == rhs); }
 
 	bool is_close(const n_vector<T, N>& v, const T tol) const;
-	bool is_null(const T& tol = (T)0) const;
+	bool is_null() const;
 
 	// Arithmetic operations
 	template<typename U, int M> friend n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
@@ -163,8 +164,9 @@ bool n_vector<T, N>::is_close(const n_vector<T, N>& v, const T tol) const
 }
 
 template <typename T, int N>
-bool n_vector<T, N>::is_null(const T& tol) const
+bool n_vector<T, N>::is_null() const
 {
+	const T tol = std::numeric_limits<T>::epsilon();	// should be OK for comparing to 0
 	return is_close(n_vector<T, N>(), tol);
 }
 

@@ -41,7 +41,7 @@ namespace tut
 		const quatd ki = k * i;
 		const quatd ik = i * k;
 
-		const double tol = 1.0e-128;
+		const double tol = std::numeric_limits<double>::min();
 		ensure(isq.is_close(-1.0, tol));
 		ensure(jsq.is_close(-1.0, tol));
 		ensure(ksq.is_close(-1.0, tol));
@@ -66,8 +66,9 @@ namespace tut
 
 		const quatd q(1.0 / 3.0, 0.5, 1.0, 2.0 / 3.0);	// random crap
 
-		ensure(q.get_conj().is_close(-0.5 * (q + (i*q*i) + (j*q*j) + (k*q*k)), 1.0e-15));
-		ensure(q.get_conj().is_close(q.a() - q.bi() - q.cj() - q.dk(), 1.0e-15));
+		const double tol = std::numeric_limits<double>::epsilon();
+		ensure(q.get_conj().is_close(-0.5 * (q + (i*q*i) + (j*q*j) + (k*q*k)), tol));
+		ensure(q.get_conj().is_close(q.a() - q.bi() - q.cj() - q.dk(), tol));
 	}
 
 	template <> template <>
@@ -82,17 +83,18 @@ namespace tut
 		const quatd q_q_star = q.get_conj() * q;
 
 		// q_star_q, q_q_star should be scalar
-		ensure(q_star_q.vector_part().is_null(1.0e-15));
-		ensure(q_q_star.vector_part().is_null(1.0e-15));
+		ensure(q_star_q.is_scalar());
+		ensure(q_q_star.is_scalar());
 
-		ensure(close(qn, sqrt(q_star_q.scalar_part()), 1.0e-15));
-		ensure(close(qn, sqrt(q_q_star.scalar_part()), 1.0e-15));
-		ensure(close(qn, sqrt((q.a() * q.a()) + (q.b() * q.b()) + (q.c() * q.c()) + (q.d() * q.d())), 1.0e-15));
+		const double tol = std::numeric_limits<double>::epsilon();
+		ensure(close(qn, sqrt(q_star_q.scalar_part()), tol));
+		ensure(close(qn, sqrt(q_q_star.scalar_part()), tol));
+		ensure(close(qn, sqrt((q.a() * q.a()) + (q.b() * q.b()) + (q.c() * q.c()) + (q.d() * q.d())), tol));
 
 		const double alpha = 0.5;
-		ensure(close((alpha * q).norm(), (alpha * q.norm()), 1.0e-15));
+		ensure(close((alpha * q).norm(), (alpha * q.norm()), tol));
 
 		const quatd q1(8.27843, -2.359783, -1.84394, 5.28497);
-		ensure(close((q * q1).norm(), q.norm() * q1.norm(), 1.0e-12));	// tol a little looser due to sqrt()
+		ensure(close((q * q1).norm(), q.norm() * q1.norm(), tol * 100.0));	// tol a little looser due to sqrt()
 	}
 };

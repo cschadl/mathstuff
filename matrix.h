@@ -14,6 +14,7 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
+#include <limits>
 
 #include <assert.h>
 
@@ -115,6 +116,16 @@ public:
 	 * Calls static svd() function with *this as A matrix.
 	 */
 	bool svd(std::valarray<T>& w, matrix<T>& V);
+
+	/**
+	 * Determine the rank of A given matrix from its singular values
+	 */
+	static size_t sv_rank(const std::valarray<T>& w);
+
+	/**
+	 * Determine the rank of this matrix using the SVD
+	 */
+	size_t rank() const;
 
 	// These make implementing e.g. a 'diagonal matrix' subclass
 	// very awkward (how do  we access off-diagonal elements?)

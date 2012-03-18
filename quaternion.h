@@ -59,7 +59,9 @@ public:
 	T norm() const;
 	T norm_sq() const;
 
-	//bool is_scalar() const;	/* xxx - we need a regular tol for this.  n_vector needs one, too */
+	bool is_scalar() const;
+	bool is_imaginary() const;
+	bool is_null() const;
 
 	/** get the 4x4 rotation matrix for this quaternion **/
 	//matrix<T> rotation_matrix() const;

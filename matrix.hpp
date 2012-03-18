@@ -517,8 +517,8 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	}
 
 	// sort the singular values in descending order
-	static bool sort_sv = true;
-	if (sort_sv)
+	//static bool sort_sv = true;
+	//if (sort_sv)
 	{
 		for (i = 0 ; i < n - 1 ; i++)
 		{
@@ -549,6 +549,29 @@ template <typename T>
 bool matrix<T>::svd(std::valarray<T>& w, matrix<T>& V)
 {
 	return svd(*this, w, V);
+}
+
+//static
+template <typename T>
+size_t matrix<T>::sv_rank(const std::valarray<T>& w)
+{
+	size_t rank = 0;
+	for (size_t i = 0 ; i < w.size() ; i++)
+		if (w[i] > std::numeric_limits<T>::epsilon())
+			rank++;
+
+	return rank;
+}
+
+template <typename T>
+size_t matrix<T>::rank() const
+{
+	matrix<T> A = *this;
+	std::valarray<T> w;
+	matrix<T> V(m_n_cols, m_n_cols);
+
+	svd(A, w, V);
+	return sv_rank(w);
 }
 
 template <typename T>
