@@ -285,7 +285,6 @@ namespace tut
 		for (size_t i = E1.c_begin() ; i < E1.c_end() ; i++)
 		{
 			ensure(E2(0, i) == E1(1, i));
-			ensure(E1(0, i) == E2(1, i));
 		}
 
 		matrix<double> E3 = E1;
@@ -293,7 +292,14 @@ namespace tut
 		for (size_t i = E1.r_begin() ; i < E1.r_end() ; i++)
 		{
 			ensure(E3(i, 0) == E1(i, 2));
-			ensure(E1(i, 0) == E3(i, 2));
+		}
+
+		matrix<double> E4 = E1.get_transpose();
+		E1.transpose();
+		E4.col_swap(3, 4);
+		for (size_t i = E1.r_begin() ; i < E1.r_end() ; i++)
+		{
+			ensure(E4(i, 3) == E1(i, 4));
 		}
 	}
 };
