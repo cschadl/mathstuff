@@ -225,6 +225,7 @@ namespace tut
 		}
 
 		ensure(M_.is_close(R1, 1.0e-15));
+		ensure(M_.rank() == 3);
 	}
 
 	template <> template <>
@@ -278,6 +279,7 @@ namespace tut
 		}
 
 		ensure(A1.is_close(R1, 1.0e-5));
+		ensure(A1.rank() == 2);
 	}
 
 	template <> template <>
