@@ -31,8 +31,6 @@ namespace tut
 	{
 		set_test_name("basic matrix arithmetic");
 
-		std::cout << std::numeric_limits<double>::min();
-
 		matrix<double> A(4, 3);
 		matrix<double> B(3, 2);
 
