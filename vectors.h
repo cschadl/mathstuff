@@ -43,7 +43,7 @@ public:
 	int size() const { return Dim; }
 
 	virtual T length() const;					/** length **/
-	virtual T length_sq() const;				/** length squared **/
+	virtual T length_sq() const;				/** length squared (faster, but less percise than length() (?) **/
 
 	virtual n_vector<T, N>  make_unit() const;	/** make a unit vector from this vector **/
 	virtual n_vector<T, N>& unit();				/** unitize this vector **/
@@ -179,9 +179,9 @@ T n_vector<T, N>::length() const
 template <typename T, int N>
 T n_vector<T, N>::length_sq() const
 {
-	T length_sq = 0;
+	T length_sq = (T)0;
 	for (int i = 0 ; i < N ; i++)
-		length_sq += (m_v[i] * m_v[i]);
+		length_sq += pow(m_v[i], (T)2);
 
 	return length_sq;
 }
@@ -204,11 +204,11 @@ T n_vector<T, N>::norm(unsigned int p) const
 {
 	// TODO - p must not be 0
 
-	T p_norm = 0;
+	T p_norm = (T)0;
 	for (int i = 0 ; i < Dim ; i++)
 		p_norm += fabs(pow(m_v[i], (T) p));
 
-	p_norm = pow(p_norm, 1.0 / (T) p);
+	p_norm = pow(p_norm, (T)1 / (T) p);
 
 	return p_norm;
 }

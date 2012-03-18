@@ -16,6 +16,7 @@
 using maths::n_vector;
 using maths::vector3d;
 using maths::vector3f;
+using maths::close;
 
 namespace tut
 {
@@ -41,15 +42,18 @@ namespace tut
 	{
 		set_test_name("inner product");
 
-		ensure(i.inner_product(j) == 0);
-		ensure(j.inner_product(i) == 0);
-		ensure(i.inner_product(k) == 0);
-		ensure(k.inner_product(i) == 0);
-		ensure(j.inner_product(k) == 0);
-		ensure(k.inner_product(j) == 0);
-		ensure(outer_product(i, j).is_close(k,  1.0e-64));
-		ensure(outer_product(j, i).is_close(-k, 1.0e-64));	// shouldn't need to do this...
-		ensure((i % j) == k);
+		const double tol = std::numeric_limits<double>::min();
+
+		ensure(close(i.inner_product(j), 0.0, tol));
+		ensure(close(j.inner_product(i), 0.0, tol));
+		ensure(close(i.inner_product(k), 0.0, tol));
+		ensure(close(k.inner_product(i), 0.0, tol));
+		ensure(close(j.inner_product(k), 0.0, tol));
+		ensure(close(k.inner_product(j), 0.0, tol));
+		ensure(outer_product(i, j).is_close(k,  tol));
+		ensure(outer_product(j, i).is_close(-k, tol));	// shouldn't need to do this...
+		ensure((i % j).is_close(k, tol));
+		ensure((j % i).is_close(-k, tol));
 	}
 
 	template <> template<>
@@ -57,15 +61,17 @@ namespace tut
 	{
 		set_test_name("vector length");
 
+		const double tol = std::numeric_limits<double>::epsilon();
+
 		vector3d v = i + j + k;
 		ensure(v[0] == 1.0 && v[1] == 1.0 && v[1] == 1.0);
 		ensure(v.length() > 1.0);
 		const vector3d vu = v.make_unit();
-		ensure(vu.length() == v.unit().length());
-		ensure(vu.length() == 1.0);
-		ensure(maths::close(vu.length_sq(), 1.0, 1.0e-15));
-		ensure(maths::close(v.length_sq(), 1.0, 1.0e-15));
-		ensure(v.length() == 1.0);
+		ensure(vu.length() == v.unit().length());	// unitize v
+		ensure(close(vu.length(), 1.0, tol));
+		ensure(close(vu.length_sq(), 1.0, tol * 2.0));
+		ensure(close(v.length_sq(), 1.0, tol * 2.0));
+		ensure(close(v.length(), 1.0, tol));
 	}
 
 	template <> template <>
@@ -77,7 +83,7 @@ namespace tut
 		vector3d v2(0.5, 0.0, 0.0);
 		vector3d v3(0.0, 0.0, 0.5);
 
-		const double tol = 1.0e-64;
+		const double tol = std::numeric_limits<double>::min();
 		ensure((v1 + v2).is_close(vector3d(0.5, 0.5, 0.0), tol));
 		ensure((v2 + v2).is_close(vector3d(1.0, 0.0, 0.0), tol));
 		ensure(((v1 + v2) - v2).is_close(v1, tol));
