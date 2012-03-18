@@ -96,8 +96,8 @@ bool matrix<T>::is_close(const matrix<T>& rhs, const T& tol) const
 	// row major, and the other is column major?
 
 	// make sure we're using 0-based indices
-	scoped_index_change ai(*this, m_idx->make_zero());
-	scoped_index_change bi(rhs, rhs.m_idx->make_zero());
+	scoped_index_change ai(this, m_idx->make_zero());
+	scoped_index_change bi(&rhs, rhs.m_idx->make_zero());
 
 	for (size_t i = 0 ; i < m_n_rows ; i++)
 		for (size_t j = 0 ; j < m_n_cols ; j++)
@@ -163,6 +163,29 @@ matrix<T>& matrix<T>::fill(const T& val)
 	return *this;
 }
 
+template <typename T>
+matrix<T>& matrix<T>::row_swap(size_t i, size_t j)
+{
+	// xxx - need to add some sort of "row / col" iterator
+	for (size_t ci = c_begin() ; ci < r_end() ; ci++)
+	{
+		std::swap((*this)(i, ci), (*this)(j, ci));
+	}
+
+	return *this;
+}
+
+template <typename T>
+matrix<T>& matrix<T>::col_swap(size_t i, size_t j)
+{
+	for (size_t ri = r_begin() ; ri < r_end() ; ri++)
+	{
+		std::swap((*this)(ri, i), (*this)(ri, j));
+	}
+
+	return *this;
+}
+
 //static
 template <typename T>
 matrix<T> matrix<T>::I(size_t n)
@@ -185,7 +208,7 @@ const diag_matrix<T>* matrix<T>::diag(const std::valarray<T>& w)
 template <typename T>
 bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 {
-	scoped_index_change this_index(a, a.m_idx->make_one());	// used one-based indexing for this algorithm
+	scoped_index_change this_index(&a, a.m_idx->make_one());	// used one-based indexing for this algorithm
 
 	const size_t m = a.rows();
 	const size_t n = a.cols();
@@ -195,7 +218,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	w = std::valarray<T>((T)0, n);
 	V = matrix<T>(n, n);
 
-	scoped_index_change Vt_index(V, V.m_idx->make_one());	// make sure V is indexed 1..n
+	scoped_index_change Vt_index(&V, V.m_idx->make_one());	// make sure V is indexed 1..n
 
 	matrix<T> rv1(1, n);
 	rv1.m_idx = std::auto_ptr<indexer>(new row_major_1_indexer(&rv1));
@@ -203,16 +226,20 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	size_t i, its, j, jj, k, l, nm;
 	T anorm, c, f, g, h, s, scale, x, y, z;
 
+	scale = 0.0;
+	s = 0.0;
+	g = 0.0;
+
 	for (i = 1 ; i <= n ; i++)
 	{
 		l = i + 1;
 		rv1(1, i) = scale * g;
 
-		// Householder reduction to bidagonal form
-		s = 0.0;
 		g = 0.0;
+		s = 0.0;
 		scale = 0.0;
 
+		// Householder reduction to bidagonal form
 		if (i <= m)
 		{
 			for (k = i ; k <= m ; k++)
@@ -377,7 +404,8 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 				// Supposedly, we shouldn't ever hit this assert because
 				// of the condition that rv[1] is always 0 (we'll break
 				// out of the loop above)
-				assert(nm >= 1);
+				if (nm < 1)
+					assert(nm >= 1);
 				if ((abs(w[nm - 1]) + anorm) == anorm)
 					break;
 			}
@@ -488,6 +516,32 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 		}
 	}
 
+	// sort the singular values in descending order
+	static bool sort_sv = true;
+	if (sort_sv)
+	{
+		for (i = 0 ; i < n - 1 ; i++)
+		{
+			T sv_largest = w[i];
+			size_t sv_largest_idx = i;
+			for (j = i + 1 ; j < n ; j++)
+			{
+				if (w[j] > sv_largest)
+				{
+					sv_largest = w[j];
+					sv_largest_idx = j;
+				}
+			}
+
+			if (sv_largest_idx != i)
+			{
+				std::swap(w[i], w[sv_largest_idx]);
+				a.col_swap(i + 1, sv_largest_idx + 1);
+				V.col_swap(i + 1, sv_largest_idx + 1);
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -503,7 +557,11 @@ T& matrix<T>::operator()(size_t i, size_t j)
 	if (i < r_begin() || i > r_end() || j < c_begin() || j > c_end())
 		throw matrix_index_exception<T>(this, i, j);
 
-	return m_A[_idx(i, j)];
+	const size_t n = _idx(i, j);
+	if (n >= m_A.size())
+		throw matrix_index_exception<T>(this, i, j);
+
+	return m_A[n];
 }
 
 template <typename T>
@@ -512,7 +570,11 @@ const T& matrix<T>::operator()(size_t i, size_t j) const
 	if (i < r_begin() || i > r_end() || j < c_begin() || j > c_end())
 		throw matrix_index_exception<T>(this, i, j);
 
-	return m_A[_idx(i, j)];
+	const size_t n = _idx(i, j);
+	if (n >= m_A.size())
+		throw matrix_index_exception<T>(this, i, j);
+
+	return m_A[n];
 }
 
 template <typename _T>
@@ -529,8 +591,8 @@ matrix<_T> operator*(const matrix<_T>& a, const matrix<_T>& b)
 	typename matrix<_T>::indexer* bip = b.m_idx.get();
 	{
 		// use the zero-based index for each of our matrices
-		typename matrix<_T>::scoped_index_change a_index(a, a.m_idx->make_zero());
-		typename matrix<_T>::scoped_index_change b_index(b, b.m_idx->make_zero());
+		typename matrix<_T>::scoped_index_change a_index(&a, a.m_idx->make_zero());
+		typename matrix<_T>::scoped_index_change b_index(&b, b.m_idx->make_zero());
 
 		const size_t m = a.rows();
 		const size_t n = b.cols();
@@ -586,8 +648,8 @@ matrix<_T> operator+(const matrix<_T>& a, const matrix<_T>& b)
 
 	matrix<_T> c(a.rows(), a.cols());
 
-	typename matrix<_T>::scoped_index_change ai(a, a.m_idx->make_zero());
-	typename matrix<_T>::scoped_index_change bi(b, b.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change ai(&a, a.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change bi(&b, b.m_idx->make_zero());
 	for (size_t i = 0 ; i < a.rows() ; i++)
 		for (size_t j = 0 ; j < b.cols() ; j++)
 			c(i, j) = a(i, j) + b(i, j);
@@ -604,8 +666,8 @@ matrix<_T> operator-(const matrix<_T>& a, const matrix<_T>& b)
 
 	matrix<_T> c(a.rows(), a.cols());
 
-	typename matrix<_T>::scoped_index_change ai(a, a.m_idx->make_zero());
-	typename matrix<_T>::scoped_index_change bi(b, b.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change ai(&a, a.m_idx->make_zero());
+	typename matrix<_T>::scoped_index_change bi(&b, b.m_idx->make_zero());
 	for (size_t i = 0 ; i < a.rows() ; i++)
 		for (size_t j = 0 ; j < b.cols() ; j++)
 			c(i, j) = a(i, j) - b(i, j);

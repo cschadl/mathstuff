@@ -205,12 +205,24 @@ namespace tut
 		A(1,2) = 3.0;
 		A(3,1) = 4.0;
 		matrix<double> M_ = A;
+
 		ensure(A.svd(w, V));
 		ensure((A * A.get_transpose()).is_close(matrix<double>::I(A.rows()), 1.0e-12));
 		ensure((V * V.get_transpose()).is_close(matrix<double>::I(A.cols()), 1.0e-12));
+
 		std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
 		const diag_matrix<double>& Dw = *pDw;
+
 		matrix<double> R1 = A * Dw * V.get_transpose();
+
+		static bool show_me = false;
+		if (show_me)
+		{
+		cout << "U: " << A << endl << "w: " << endl << Dw << endl << "V: " << endl << V << endl;
+		cout << "M_:" << endl << M_ << endl;
+		cout << "R1:" << endl << R1 << endl;
+		}
+
 		ensure(M_.is_close(R1, 1.0e-15));
 	}
 
@@ -242,7 +254,51 @@ namespace tut
 		//ensure((V * V.get_transpose()).is_close(matrix<float>::I(A.cols()), 1.0e-8));
 		std::auto_ptr< const diag_matrix<float > > pDw(matrix<float>::diag(w));
 		const diag_matrix<float>& Dw = *pDw;
+
 		matrix<float> R1 = A * Dw * V.get_transpose();
-		ensure(A1.is_close(R1, 1.0e-5));	// we get kind of lousy results using floating point arithmetic here...
+
+		static bool show_me = false;
+		if (show_me)
+		{
+		cout << "U: " << endl << A << endl <<
+				"w: " << endl << Dw << endl <<
+				"V: " << endl << V.get_transpose() << endl;
+		cout << "A1:" << endl << A1 << endl << "R1:" << endl << R1 << endl;
+		}
+
+		ensure(A1.is_close(R1, 1.0e-5));
+	}
+
+	template <> template <>
+	void matrix_tests::object::test<6>()
+	{
+		set_test_name("row_swap(), col_swap()");
+
+		matrix<double> E1(3, 3);
+		E1(0, 0) = 1.0;
+		E1(0, 1) = 2.0;
+		E1(0, 2) = 3.0;
+		E1(1, 0) = 4.0;
+		E1(1, 1) = 5.0;
+		E1(1, 2) = 6.0;
+		E1(2, 0) = 7.0;
+		E1(2, 1) = 8.0;
+		E1(2, 2) = 9.0;
+
+		matrix<double> E2 = E1;
+		E2.row_swap(0, 1);
+		for (size_t i = 0 ; i < 3 ; i++)
+		{
+			ensure(E2(0, i) == E1(1, i));
+			ensure(E1(0, i) == E2(1, i));
+		}
+
+		matrix<double> E3 = E1;
+		E3.col_swap(0, 2);
+		for (size_t i = 0 ; i < 3 ; i++)
+		{
+			ensure(E3(i, 0) == E1(i, 2));
+			ensure(E1(i, 0) == E3(i, 2));
+		}
 	}
 };

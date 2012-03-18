@@ -13,6 +13,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <algorithm>
 
 #include <assert.h>
 
@@ -39,7 +40,7 @@ protected:
 	class indexer
 	{
 	protected:
-		const matrix<T>* mp;
+		const matrix<T> * const mp;
 	public:
 		indexer(const matrix<T>* m) : mp(m) { }
 		const matrix<T>* get_mp() const { return mp; }
@@ -91,6 +92,9 @@ public:
 	matrix<T>  get_transpose() const;
 	virtual matrix<T>& resize(size_t m, size_t n);
 	virtual matrix<T>& fill(const T& val);
+
+	virtual matrix<T>& row_swap(size_t i, size_t j);
+	virtual matrix<T>& col_swap(size_t i, size_t j);
 
 	/** returns a nxn identity matrix **/
 	static matrix<T> I(size_t n);
@@ -214,21 +218,21 @@ protected:
 	class scoped_index_change
 	{
 	protected:
-		const matrix<T>& 		mp;
+		const matrix<T> * const mp;
 		std::auto_ptr<indexer>	orig_index;
 
 	public:
-		scoped_index_change(const matrix<T>& m, indexer* new_index)
+		scoped_index_change(const matrix<T>* m, indexer* new_index)
 		: mp(m)
-		, orig_index(m.m_idx.release())
+		, orig_index(m->m_idx.release())
 		{
-			assert(new_index->get_mp() == &mp);
-			mp.m_idx = std::auto_ptr<indexer>(new_index);
+			assert(new_index->get_mp() == mp);
+			mp->m_idx = std::auto_ptr<indexer>(new_index);
 		}
 
 		~scoped_index_change()
 		{
-			mp.m_idx = std::auto_ptr<indexer>(orig_index.release());
+			mp->m_idx = std::auto_ptr<indexer>(orig_index.release());
 		}
 	};
 };
