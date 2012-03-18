@@ -274,20 +274,15 @@ namespace tut
 	{
 		set_test_name("row_swap(), col_swap()");
 
-		matrix<double> E1(3, 3);
-		E1(0, 0) = 1.0;
-		E1(0, 1) = 2.0;
-		E1(0, 2) = 3.0;
-		E1(1, 0) = 4.0;
-		E1(1, 1) = 5.0;
-		E1(1, 2) = 6.0;
-		E1(2, 0) = 7.0;
-		E1(2, 1) = 8.0;
-		E1(2, 2) = 9.0;
+		double u = 0.0;
+		matrix<double> E1(5, 3);
+		for (size_t i = E1.r_begin() ; i < E1.r_end() ; i++)
+			for (size_t j = E1.c_begin() ; j < E1.c_end() ; j++)
+				E1(i, j) = ++u;
 
 		matrix<double> E2 = E1;
 		E2.row_swap(0, 1);
-		for (size_t i = 0 ; i < 3 ; i++)
+		for (size_t i = E1.c_begin() ; i < E1.c_end() ; i++)
 		{
 			ensure(E2(0, i) == E1(1, i));
 			ensure(E1(0, i) == E2(1, i));
@@ -295,7 +290,7 @@ namespace tut
 
 		matrix<double> E3 = E1;
 		E3.col_swap(0, 2);
-		for (size_t i = 0 ; i < 3 ; i++)
+		for (size_t i = E1.r_begin() ; i < E1.r_end() ; i++)
 		{
 			ensure(E3(i, 0) == E1(i, 2));
 			ensure(E1(i, 0) == E3(i, 2));

@@ -167,7 +167,7 @@ template <typename T>
 matrix<T>& matrix<T>::row_swap(size_t i, size_t j)
 {
 	// xxx - need to add some sort of "row / col" iterator
-	for (size_t ci = c_begin() ; ci < r_end() ; ci++)
+	for (size_t ci = c_begin() ; ci < c_end() ; ci++)
 	{
 		std::swap((*this)(i, ci), (*this)(j, ci));
 	}
