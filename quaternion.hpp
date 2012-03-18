@@ -184,6 +184,18 @@ quaternion<_T> operator*(const _T&c, const quaternion<_T>& q)
 }
 
 template <typename _T>
+quaternion<_T> operator*(const quaternion<_T>& q, const n_vector<_T, 3>& v)
+{
+	return quaternion<_T>(q.scalar_part(), q.vector_part() * v);
+}
+
+template <typename _T>
+quaternion<_T> operator*(const n_vector<_T, 3>& v, const quaternion<_T>& q)
+{
+	return q * v;
+}
+
+template <typename _T>
 quaternion<_T> operator/(const quaternion<_T>& q, const _T& c)
 {
 	return quaternion<_T>(q.scalar_part() / c, q.vector_part() / c);

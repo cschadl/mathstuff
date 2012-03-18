@@ -75,6 +75,8 @@ template <typename _T> quaternion<_T> operator-(const _T& a, const quaternion<_T
 template <typename _T> quaternion<_T> operator*(const quaternion<_T>& q1, const quaternion<_T>& q2);
 template <typename _T> quaternion<_T> operator*(const quaternion<_T>& q, const _T& c);
 template <typename _T> quaternion<_T> operator*(const _T& c, const quaternion<_T>& q);
+template <typename _T> quaternion<_T> operator*(const quaternion<_T>& q, const n_vector<_T, 3>& v);
+template <typename _T> quaternion<_T> operator*(const n_vector<_T, 3>& v, const quaternion<_T>& q);
 template <typename _T> quaternion<_T> operator/(const quaternion<_T>& q, const _T& d);
 template <typename _T> quaternion<_T> operator-(const quaternion<_T>& q);
 
