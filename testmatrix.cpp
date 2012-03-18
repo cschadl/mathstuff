@@ -9,6 +9,7 @@
 
 #include <iomanip>
 #include <memory>
+#include <limits>
 
 #include <tut.h>
 
@@ -29,6 +30,8 @@ namespace tut
 	void matrix_tests::object::test<1>()
 	{
 		set_test_name("basic matrix arithmetic");
+
+		std::cout << std::numeric_limits<double>::min();
 
 		matrix<double> A(4, 3);
 		matrix<double> B(3, 2);
