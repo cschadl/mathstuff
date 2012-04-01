@@ -237,9 +237,6 @@ namespace tut
 	{
 		set_test_name("SVD test 2");
 
-		// Note - sometimes this test will fail, but if it's run again, it will work fine.
-		// I don't know why.
-
 		matrix<float> A(4, 2);
 		A(0, 0) = 2.0; A(0, 1) = 4.0;
 		A(1, 0) = 1.0; A(1, 1) = 3.0;
@@ -270,13 +267,6 @@ namespace tut
 				"V: " << endl << V.get_transpose() << endl;
 		cout << "A1:" << endl << A1 << endl << "R1:" << endl << R1 << endl;
 		}
-
-//		if (!A1.is_close(R1, 1.0e-5))
-//		{
-//			cout << "Uh oh, A1 test failed!" << endl;
-//			cout << "A1: " << endl << A1 << endl;
-//			cout << "R1: " << endl << R1 << endl;
-//		}
 
 		ensure(A1.is_close(R1, 1.0e-5));
 		ensure(A1.rank() == 2);

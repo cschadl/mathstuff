@@ -261,6 +261,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	scale = 0.0;
 	s = 0.0;
 	g = 0.0;
+	anorm = 0.0;
 
 	for (i = 1 ; i <= n ; i++)
 	{
