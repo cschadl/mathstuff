@@ -208,8 +208,12 @@ namespace tut
 		matrix<double> M_ = A;
 
 		ensure(A.svd(w, V));
-		ensure((A * A.get_transpose()).is_close(matrix<double>::I(A.rows()), 1.0e-12));
-		ensure((V * V.get_transpose()).is_close(matrix<double>::I(A.cols()), 1.0e-12));
+		//ensure((A * A.get_transpose()).is_close(matrix<double>::I(A.rows()), 1.0e-12));
+		//ensure((V * V.get_transpose()).is_close(matrix<double>::I(A.cols()), 1.0e-12));	// ^^^^
+		std::auto_ptr< const diag_matrix<double> > Im(matrix<double>::diag(A.rows(), 1.0));	// either of these should work
+		std::auto_ptr< const diag_matrix<double> > In(matrix<double>::diag(A.cols(), 1.0));
+		ensure((A * A.get_transpose()).is_close(*Im, 1.0e-12));
+		ensure((V * V.get_transpose()).is_close(*In, 1.0e-12));
 
 		std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
 		const diag_matrix<double>& Dw = *pDw;
@@ -237,14 +241,10 @@ namespace tut
 		// I don't know why.
 
 		matrix<float> A(4, 2);
-		A(0, 0) = 2.0;
-		A(0, 1) = 4.0;
-		A(1, 0) = 1.0;
-		A(1, 1) = 3.0;
-		A(2, 0) = 2.5;	// these should work, too...
-		A(2, 1) = 3.6;
-		A(3, 0) = 1.7;
-		A(3, 1) = 2.8;
+		A(0, 0) = 2.0; A(0, 1) = 4.0;
+		A(1, 0) = 1.0; A(1, 1) = 3.0;
+		A(2, 0) = 2.5; A(2, 1) = 3.6;
+		A(3, 0) = 1.7; A(3, 1) = 2.8;
 		matrix<float> A1 = A;
 
 		matrix<float> V(2, 2);
@@ -271,12 +271,12 @@ namespace tut
 		cout << "A1:" << endl << A1 << endl << "R1:" << endl << R1 << endl;
 		}
 
-		if (!A1.is_close(R1, 1.0e-5))
-		{
-			cout << "Uh oh, A1 test failed!" << endl;
-			cout << "A1: " << endl << A1 << endl;
-			cout << "R1: " << endl << R1 << endl;
-		}
+//		if (!A1.is_close(R1, 1.0e-5))
+//		{
+//			cout << "Uh oh, A1 test failed!" << endl;
+//			cout << "A1: " << endl << A1 << endl;
+//			cout << "R1: " << endl << R1 << endl;
+//		}
 
 		ensure(A1.is_close(R1, 1.0e-5));
 		ensure(A1.rank() == 2);
@@ -315,4 +315,61 @@ namespace tut
 			ensure(E4(i, 3) == E1(i, 4));
 		}
 	}
+
+	template <> template <>
+	void matrix_tests::object::test<7>()
+	{
+		set_test_name("vector multiplication");
+
+		const double tol = std::numeric_limits<double>::epsilon();
+
+		matrix<double> Q(3, 3);
+		Q(0, 0) = 0.30; Q(0, 1) = 0.48; Q(0, 2) = -0.8;
+		Q(1, 0) = -0.8; Q(1, 1) = 0.60; Q(1, 2) = 0.00;
+		Q(2, 0) = 0.48; Q(2, 1) = 0.64; Q(2, 2) = 0.60;
+
+		std::valarray<double> p(3);
+		p[0] = 0.5; p[1] = 0.1; p[2] = 0.3;
+
+		std::valarray<double> pt1 = Q * p;
+		ensure(maths::close(pt1[0], -0.042, tol));
+		ensure(maths::close(pt1[1], -0.340, tol));
+		ensure(maths::close(pt1[2],  0.484, tol));
+
+		std::valarray<double> pt2 = p * Q;
+		ensure(maths::close(pt2[0],  0.214, tol));
+		ensure(maths::close(pt2[1],  0.492, tol));
+		ensure(maths::close(pt2[2], -0.220, tol));
+	}
+
+//	template <> template <>
+//	void matrix_tests::object::test<8>()
+//	{
+//		set_test_name("pseudo-inverse");
+//
+//		// pseudo-inverse of a square-invertible matrix is just the inverse
+//		matrix<double> Asq (3, 3);
+//		Asq(0, 0) = 5.053;  Asq(0, 1) =  4.352; Asq(0, 2) = 9.241;
+//		Asq(1, 0) = -0.742; Asq(1, 1) =  8.742; Asq(1, 2) = -1.245;
+//		Asq(2, 0) = 5.278;  Asq(2, 1) = -0.152; Asq(2, 2) = 5.0435;
+//
+//		{
+//			matrix<double> U = Asq;
+//
+//			matrix<double> V(3, 3);
+//			std::valarray<double> w(3);
+//			matrix<double>::svd(U, w, V);
+//			std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
+//			const diag_matrix<double> & Dw = *pDw;
+//
+//			matrix<double> Asq_ = U * Dw * V.get_transpose();
+//			matrix<double> redisue = Asq - Asq_;
+//			ensure(redisue.is_close(matrix<double>(3, 3), 1.0e-13));
+//		}
+//
+//		matrix<double> Asq_pinv = Asq.get_pseudo_inverse();
+//
+//		matrix<double> I = Asq * Asq_pinv;
+//		ensure(I.is_close(matrix<double>::I(3), std::numeric_limits<double>::epsilon()));
+//	}
 };

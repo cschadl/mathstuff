@@ -91,6 +91,11 @@ public:
 
 	matrix<T>& transpose();
 	matrix<T>  get_transpose() const;
+
+	//virtual matrix<T>& inverse();
+	//matrix<T>& pseudo_inverse();	// wouldn't be any more efficient than get_pseudo_inverse()...
+	matrix<T>  get_pseudo_inverse() const;	// gets the pseudo-inverse of the matrix from the SVD
+
 	virtual matrix<T>& resize(size_t m, size_t n);
 	virtual matrix<T>& fill(const T& val);
 
@@ -100,15 +105,24 @@ public:
 	/** returns a nxn identity matrix **/
 	static matrix<T> I(size_t n);
 
-	/** create an nxn diagonal matrix
-	 *  (pointer, because it must be const)
+	/**
+	 *  create an nxn diagonal matrix
+	 *
+	 *  \details We return a pointer because we need to enforce that the object returned is const
 	 */
 	static const diag_matrix<T>* diag(const std::valarray<T>& d);
+	static const diag_matrix<T>* diag(const size_t n, const T& x);
 
-	/** Compute the singular value decomposition A = U*W*Vt of this matrix.
-	 *  The entries of a are replaced with U, w is a vector whose
-	 *  entries are the diagonal elements of the m x m matrix W.
-	 *  V is returned rather than Vt.
+	/**
+	 *  Compute the singular value decomposition A = U*W*Vt of this matrix.
+	 *
+	 *  \details	The entries of a are replaced with U, w is a vector whose
+	 *  			entries are the diagonal elements of the n x n matrix W.
+	 *  			V is returned rather than Vt.
+	 *
+	 *  \param a	An m x n matrix, whose entries are replaced with U
+	 *  \param w	The diagonal entries of the n x n singular value matrix
+	 *  \param V	an n x n orthogonal matrix
 	 */
 	static bool svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V);
 
@@ -127,9 +141,13 @@ public:
 	 */
 	size_t rank() const;
 
-	// These make implementing e.g. a 'diagonal matrix' subclass
-	// very awkward (how do  we access off-diagonal elements?)
-	// It might be better to have operator[] return an inner 'row' class
+	/**
+	 * 	Solve the given linear system using the SVD (pseudo-inverse) of the matrix
+	 *
+	 *	\details uses the pseudo-inverse to solve the matrix, so can solve over-determined systems
+	 */
+	bool solve(const std::valarray<T>& b, std::valarray<T>& x);
+
 	virtual const T& operator()(size_t i, size_t j) const;
 	virtual T& operator()(size_t i, size_t j);
 
@@ -150,6 +168,12 @@ public:
 
 	template <typename _T>
 	friend matrix<_T> operator*(const _T& c, const matrix<_T>& m);
+
+	template <typename _T>
+	friend std::valarray<_T> operator*(const matrix<_T>& m, const std::valarray<_T>& v);
+
+	template <typename _T>
+	friend std::valarray<_T> operator*(const std::valarray<_T>& v, const matrix<_T>& m);
 
 	template <typename _T>
 	friend matrix<_T> operator+(const matrix<_T>& a, const matrix<_T>& b);
@@ -307,6 +331,7 @@ private:
 
 public:
 	virtual const T& operator()(size_t i, size_t j) const;
+	virtual diag_matrix<T>& inverse();
 
 	friend class matrix<T>;
 };

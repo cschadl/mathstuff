@@ -129,6 +129,30 @@ matrix<T> matrix<T>::get_transpose() const
 }
 
 template <typename T>
+matrix<T> matrix<T>::get_pseudo_inverse() const
+{
+	matrix<T> U = *this;
+	std::valarray<T> w;
+	matrix<T> V(m_n_cols, m_n_cols);
+
+	if (!U.svd(w, V))
+		return matrix<T>(1, 1);	// eww
+
+	for (size_t i = 0 ; i < w.size() ; i++)
+		w[i] = w[i] > std::numeric_limits<T>::epsilon() ? T(1) / w[i] : T(0);
+
+	std::auto_ptr< const diag_matrix<T> > pwm(matrix<T>::diag(w));
+	const diag_matrix<T> & wm = *pwm;
+	matrix<T>& Ut = U.transpose();
+
+	std::cout << "U: " << std::endl << U << std::endl;
+	std::cout << "w: " << std::endl << wm << std::endl;
+	std::cout << "V: " << std::endl << V << std::endl;
+
+	return V * wm * Ut;
+}
+
+template <typename T>
 matrix<T>& matrix<T>::resize(size_t m, size_t n)
 {
 	// xxx - throw if m == 0 || n == 0
@@ -201,6 +225,14 @@ matrix<T> matrix<T>::I(size_t n)
 template <typename T>
 const diag_matrix<T>* matrix<T>::diag(const std::valarray<T>& w)
 {
+	return new diag_matrix<T>(w);
+}
+
+//static
+template <typename T>
+const diag_matrix<T>* matrix<T>::diag(const size_t n, const T& x)
+{
+	std::valarray<T> w(x, n);
 	return new diag_matrix<T>(w);
 }
 
@@ -662,6 +694,62 @@ matrix<_T> operator*(const _T& c, const matrix<_T>& m)
 	return mc;
 }
 
+/**
+ *	Right-vector multiplication
+ *
+ *	\param m	a m x n
+ *	\param v 	a n x 1 column vector
+ *	\returns	an array representing the m x 1 column vector product
+ *	\throw		matrix_dimension_mismatch_exception if
+ */
+template <typename _T>
+inline
+std::valarray<_T> operator*(const matrix<_T>& m, const std::valarray<_T>& v)
+{
+	assert(m.cols() == v.size());
+	std::valarray<_T> u(_T(0), v.size());
+
+	typename matrix<_T>::scoped_index_change m_index(&m, m.m_idx->make_zero());
+
+	for (size_t i = 0 ; i < m.rows() ; i++)
+	{
+		for (size_t j = 0 ; j < m.cols() ; j++)
+		{
+			u[i] += m(i, j) * v[j];
+		}
+	}
+
+	return u;
+}
+
+/**
+ * 	Left-vector multiplication
+ *
+ * 	\param v	a 1 x m row vector
+ * 	\param m	a m x n matrix
+ * 	\returns 	an array representing the 1 x n row vector product
+ *
+ */
+template <typename _T>
+inline
+std::valarray<_T> operator*(const std::valarray<_T>& v, const matrix<_T>& m)
+{
+	assert(m.rows() == v.size());
+	std::valarray<_T> u(_T(0), v.size());
+
+	typename matrix<_T>::scoped_index_change m_index(&m, m.m_idx->make_zero());
+
+	for (size_t i = 0 ; i < m.cols() ; i++)
+	{
+		for (size_t j = 0 ; j < m.rows() ; j++)
+		{
+			u[i] += m(j, i) * v[j];
+		}
+	}
+
+	return u;
+}
+
 template <typename _T>
 inline
 matrix<_T> operator+(const matrix<_T>& a, const matrix<_T>& b)
@@ -747,6 +835,18 @@ const T& diag_matrix<T>::operator()(size_t i, size_t j) const
 }
 
 template <typename T>
+diag_matrix<T>& diag_matrix<T>::inverse()
+{
+	for (size_t i = this->r_begin() ; i != this->r_end() ; i++)
+	{
+		T & s = (*this)(i, i);
+		s = s > std::numeric_limits<T>::epsilon() ? T(1) / s : T(0);
+	}
+
+	return *this;
+}
+
+template <typename T>
 typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_indexer::clone(const matrix<T>* m) const
 {
 	const diag_matrix<T>* dm = dynamic_cast< const diag_matrix<T>* >(m);
@@ -781,6 +881,9 @@ typename matrix<T>::indexer* diag_matrix<T>::diag_matrix_1_indexer::make_zero() 
 
 	return new diag_matrix_indexer(dm);
 }
+
+////////////////////////////////////
+/// exception types
 
 class matrix_exception
 {
