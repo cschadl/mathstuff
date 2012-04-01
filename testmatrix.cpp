@@ -247,7 +247,7 @@ namespace tut
 		matrix<float> V(2, 2);
 		std::valarray<float> w;
 		ensure(A.svd(w, V));
-		// The "compact" SVD that .svd() returns apparently does not necessarily
+		// The "thin" SVD that .svd() returns apparently does not necessarily
 		// have the attribute that S * St = I or V * Vt = I...
 		// GNU Octave seems to agree with the results that matrix::svd() returns,
 		// and we can still always reconstruct the matrix...
