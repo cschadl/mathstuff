@@ -20,8 +20,6 @@
 
 #include "misc.h"
 
-extern void test_matrix();
-
 namespace maths
 {
 
