@@ -216,7 +216,7 @@ matrix<T> matrix<T>::I(size_t n)
 {
 	matrix<T> ident(n, n);
 	for (size_t i = 0 ; i < n ; i++)
-		ident(i, i) = 1.0;
+		ident(i, i) = T(1);
 
 	return ident;
 }
@@ -258,19 +258,19 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	size_t i, its, j, jj, k, l, nm;
 	T anorm, c, f, g, h, s, scale, x, y, z;
 
-	scale = 0.0;
-	s = 0.0;
-	g = 0.0;
-	anorm = 0.0;
+	scale = T(0);
+	s = T(0);
+	g = T(0);
+	anorm = T(0);
 
 	for (i = 1 ; i <= n ; i++)
 	{
 		l = i + 1;
 		rv1(1, i) = scale * g;
 
-		g = 0.0;
-		s = 0.0;
-		scale = 0.0;
+		g = T(0);
+		s = T(0);
+		scale = T(0);
 
 		// Householder reduction to bidagonal form
 		if (i <= m)
@@ -278,7 +278,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 			for (k = i ; k <= m ; k++)
 				scale += abs(a(k, i));
 
-			if (scale != 0.0)
+			if (scale != T(0))
 			{
 				for (k = i ; k <= m ; k++)
 				{
@@ -291,7 +291,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 				a(i, i) = f - g;
 				for (j = l ; j <=n ; j++)
 				{
-					s = 0.0;
+					s = T(0);
 					for (k = i ; k <= m ; k++)
 						s += a(k, i) * a(k, j);
 
@@ -306,16 +306,16 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 		}
 		w[i - 1] = scale * g;
 
-		g = 0.0;
-		s = 0.0;
-		scale = 0.0;
+		g = T(0);
+		s = T(0);
+		scale = T(0);
 
 		if (i <= m && i != n)
 		{
 			for (k = l ; k <= n ; k++)
 				scale += abs(a(i, k));
 
-			if (scale != 0.0)
+			if (scale != T(0))
 			{
 				for (k = l ; k <= n ; k++)
 				{
@@ -332,7 +332,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 
 				for (j = l ; j <= m ; j++)
 				{
-					s = 0.0;
+					s = T(0);
 					for (k = l ; k <= n ; k++)
 						s += a(j, k) * a(i, k);
 
@@ -360,7 +360,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 
 				for (j= l ; j <= n ; j++)
 				{
-					s = 0.0;
+					s = T(0);
 					for (k = l ; k <= n ; k++)
 						s+= a(i, k) * V(k, j);
 
@@ -369,9 +369,9 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 				}
 			}
 			for (j = l ; j <= n ; j++)
-				V(i, j) = V(j, i) = 0.0;
+				V(i, j) = V(j, i) = T(0);
 		}
-		V(i, i) = 1.0;
+		V(i, i) = T(1);
 		g = rv1(1, i);
 		l = i;
 	}
@@ -383,14 +383,14 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 		g = w[i - 1];
 
 		for (j = l ; j <= n ; j++)
-			a(i, j) = 0.0;
+			a(i, j) = T(0);
 
-		if (g != 0.0)
+		if (g != T(0))
 		{
-			g = 1.0 / g;
+			g = T(1) / g;
 			for (j = l ; j <= n ; j++)
 			{
-				s = 0.0;
+				s = T(0);
 				for (k = l ; k <= m ; k++)
 					s += a(k, i) * a(k, j);
 
@@ -405,9 +405,9 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 		else
 		{
 			for (j = i ; j <= m ; j++)
-				a(j, i) = 0.0;
+				a(j, i) = T(0);
 		}
-		a(i, i) += 1.0; // ++a[i][i] in NRC...
+		++a(i, i);
 	}
 
 	// Diagonalization of the bidiagonal form:
@@ -427,7 +427,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 				// NRC typecasts this sum before comparing for some reason
 				if ((abs(rv1(1, l)) + anorm) == anorm)
 				{
-					// I think these tests for 0.0 + anorm can
+					// I think these tests for T(0) + anorm can
 					// be improved by taking a small epsilon value
 					// into account (improved convergence)
 					flag = false;
@@ -445,8 +445,8 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 
 			if (flag)
 			{
-				c = 0.0;	// Cancellation of rv1[l] if l > 1
-				s = 1.0;
+				c = T(0);	// Cancellation of rv1[l] if l > 1
+				s = T(1);
 
 				for (i = l ; i <= k ; i++)
 				{
@@ -458,7 +458,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 					g = w[i - 1];
 					h = pythag(f, g);
 					w[i - 1] = h;
-					h = 1.0 / h;
+					h = T(1) / h;
 					c = g * h;
 					s = -f * h;
 					for (j = 1 ; j <= m ; j++)
@@ -473,7 +473,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 			z = w[k - 1];
 			if (l == k)	// Convergence
 			{
-				if (z < 0.0)
+				if (z < T(0))
 				{
 					w[k - 1] = -z;	// Singular value is made nonnegative
 					for (j = 1 ; j <= n ; j++)
@@ -493,13 +493,13 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 			y = w[nm - 1];
 			g = rv1(1, nm);
 			h = rv1(1, k);
-			f = ((y - z) * (y + z) + (g - h) * (g + h)) / (2.0 * h * y);
-			g = pythag(f, (T)1.0);
+			f = ((y - z) * (y + z) + (g - h) * (g + h)) / (T(2) * h * y);
+			g = pythag(f, (T)1);
 			f = ((x - z) * (x + z) + h * ((y / (f + sign(g, f))) - h)) / x;
 
 			// Next QR transformation
-			c = 1.0;
-			s = 1.0;
+			c = T(1);
+			s = T(1);
 			for (j = l ; j <= nm ; j++)
 			{
 				i = j + 1;
@@ -526,9 +526,9 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 
 				z = pythag(f, h);
 				w[j - 1] = z;
-				if (z != 0.0)
+				if (z != T(0))
 				{
-					z = 1.0 / z;
+					z = T(1) / z;
 					c = f * z;
 					s = h * z;
 				}
@@ -543,15 +543,15 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 					a(jj, i) = z * c - y * s;
 				}
 			}
-			rv1(1, l) = 0.0;
+			rv1(1, l) = T(0);
 			rv1(1, k) = f;
 			w[k - 1] = x;
 		}
 	}
 
 	// sort the singular values in descending order
-	//static bool sort_sv = true;
-	//if (sort_sv)
+	static bool sort_sv = true;
+	if (sort_sv)
 	{
 		for (i = 0 ; i < n - 1 ; i++)
 		{
@@ -605,6 +605,60 @@ size_t matrix<T>::rank() const
 
 	svd(A, w, V);
 	return sv_rank(w);
+}
+
+template <typename T>
+std::valarray<T> matrix<T>::svd_solve(const std::valarray<T>& b) const
+{
+	// TODO - check dimensions
+
+	matrix<T> U = *this;
+	std::valarray<T> w(T(0), m_n_cols);
+	matrix<T> V(m_n_cols, m_n_cols);
+
+	U.svd(w, V);	// TODO - check return value
+
+	for (size_t i = 0 ; i < w.size() ; i++)
+	{
+		if (w[i] < std::numeric_limits<T>::epsilon())
+			w[i] = T(0);
+	}
+
+	return svd_solve(U, w, V, b);
+}
+
+//static
+template <typename T>
+std::valarray<T> matrix<T>::svd_solve(const matrix<T>& U, const std::valarray<T>& w, const matrix<T>& V, const std::valarray<T>& b)
+{
+	const size_t m = U.rows();
+	const size_t n = U.cols();
+
+	std::valarray<T> tmp(T(0), n);
+	std::valarray<T> x(T(0), n);
+
+	for (size_t j = 0 ; j < n ; j++)	// Calculate U^t * b
+	{
+		T s = T(0);
+		if (w[j] != T(0))				// Nonzero result only if w_j is nonzero
+		{
+			for (size_t i = 0 ; i < m ; i++)
+				s += U(i, j) * b[i];
+
+			s /= w[j];
+		}
+		tmp[j] = s;
+	}
+	for (size_t j = 0 ; j < n ; j++)	// Matrix multiply by V to get answer
+	{
+		T s = T(0);
+		for (size_t jj = 0 ; jj < n ; jj++)
+			s+= V(j, jj) * tmp[jj];
+
+		x[j] = s;
+	}
+
+	return x;
 }
 
 template <typename T>

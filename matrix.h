@@ -142,11 +142,21 @@ public:
 	size_t rank() const;
 
 	/**
-	 * 	Solve the given linear system using the SVD (pseudo-inverse) of the matrix
+	 * 	Solves Ax = b using SVD back-substitution algorithm
 	 *
-	 *	\details uses the pseudo-inverse to solve the matrix, so can solve over-determined systems
+	 * 	\returns	n x 1 solution vector x
+	 *  \bug		BROKEN!
 	 */
-	bool solve(const std::valarray<T>& b, std::valarray<T>& x);
+	std::valarray<T> svd_solve(const std::valarray<T>& b) const;
+
+	/**
+	 * 	Solves Ax = b using SVD back-substitution algorithm
+	 *
+	 * 	\details 	Re-uses already calculated SVD.  Assumes "small" entries in w have already been set to 0
+	 * 	\returns	the n x 1 solution vector x
+	 *  \ bug		BROKEN!
+	 */
+	static std::valarray<T> svd_solve(const matrix<T>& U, const std::valarray<T>& w, const matrix<T>& V, const std::valarray<T>& b);
 
 	virtual const T& operator()(size_t i, size_t j) const;
 	virtual T& operator()(size_t i, size_t j);

@@ -335,31 +335,20 @@ namespace tut
 //	template <> template <>
 //	void matrix_tests::object::test<8>()
 //	{
-//		set_test_name("pseudo-inverse");
+//		set_test_name("SVD solve");
 //
-//		// pseudo-inverse of a square-invertible matrix is just the inverse
-//		matrix<double> Asq (3, 3);
-//		Asq(0, 0) = 5.053;  Asq(0, 1) =  4.352; Asq(0, 2) = 9.241;
-//		Asq(1, 0) = -0.742; Asq(1, 1) =  8.742; Asq(1, 2) = -1.245;
-//		Asq(2, 0) = 5.278;  Asq(2, 1) = -0.152; Asq(2, 2) = 5.0435;
+//		matrix<double> A(3, 3);
+//		A(0, 0) = 5.053;  A(0, 1) =  4.352; A(0, 2) = 9.241;
+//		A(1, 0) = -0.742; A(1, 1) =  8.742; A(1, 2) = -1.245;
+//		A(2, 0) = 5.278;  A(2, 1) = -0.152; A(2, 2) = 5.0435;
 //
-//		{
-//			matrix<double> U = Asq;
+//		std::valarray<double> b(0.0, 3);
+//		b[0] = 1.0; b[1] = 3.5; b[2] = -2.0;
 //
-//			matrix<double> V(3, 3);
-//			std::valarray<double> w(3);
-//			matrix<double>::svd(U, w, V);
-//			std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
-//			const diag_matrix<double> & Dw = *pDw;
+//		const std::valarray<double> x = A.svd_solve(b);
 //
-//			matrix<double> Asq_ = U * Dw * V.get_transpose();
-//			matrix<double> redisue = Asq - Asq_;
-//			ensure(redisue.is_close(matrix<double>(3, 3), 1.0e-13));
-//		}
-//
-//		matrix<double> Asq_pinv = Asq.get_pseudo_inverse();
-//
-//		matrix<double> I = Asq * Asq_pinv;
-//		ensure(I.is_close(matrix<double>::I(3), std::numeric_limits<double>::epsilon()));
+//		ensure(maths::close(x[0], -0.62352, 1.0e-15));
+//		ensure(maths::close(x[1],  0.38555, 1.0e-15));
+//		ensure(maths::close(x[2],  0.26758, 1.0e-15));
 //	}
 };
