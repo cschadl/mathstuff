@@ -332,23 +332,41 @@ namespace tut
 		ensure(maths::close(pt2[2], -0.220, tol));
 	}
 
-//	template <> template <>
-//	void matrix_tests::object::test<8>()
-//	{
-//		set_test_name("SVD solve");
-//
-//		matrix<double> A(3, 3);
-//		A(0, 0) = 5.053;  A(0, 1) =  4.352; A(0, 2) = 9.241;
-//		A(1, 0) = -0.742; A(1, 1) =  8.742; A(1, 2) = -1.245;
-//		A(2, 0) = 5.278;  A(2, 1) = -0.152; A(2, 2) = 5.0435;
-//
-//		std::valarray<double> b(0.0, 3);
-//		b[0] = 1.0; b[1] = 3.5; b[2] = -2.0;
-//
-//		const std::valarray<double> x = A.svd_solve(b);
-//
-//		ensure(maths::close(x[0], -0.62352, 1.0e-15));
-//		ensure(maths::close(x[1],  0.38555, 1.0e-15));
-//		ensure(maths::close(x[2],  0.26758, 1.0e-15));
-//	}
+	template<> template<>
+	void matrix_tests::object::test<8>()
+	{
+		set_test_name("4x4 matrix inversion");
+
+		// make an OpenGL perspective projection matrix and invert it
+		const double left = -1.0;
+		const double right = 1.0;
+		const double bottom = 3.0;
+		const double top = 4.0;
+		const double near = 1.0;
+		const double far = 10.0;
+
+		const double a = (right + left) / (right - left);
+		const double b = (top + bottom) / (top - bottom);
+		const double c = -(far + near) / (far - near);
+		const double d = - 2 * far * near / (far - near);
+
+		matrix<double> M(4, 4);
+		M(0, 0) = 2 * near / (right - left); M(0, 1) = 0.0;  M(0, 2) = a; 	 M(0, 3) = 0.0;
+		M(1, 0) = 0.0 ; M(1, 1) = 2 * near / (top - bottom); M(1, 2) = b; 	 M(1, 3) = 0.0;
+		M(2, 0) = 0.0 ; M(2, 1) = 0.0;						 M(2, 2) = c;	 M(2, 3) = d;
+		M(3, 0) = 0.0 ; M(3, 1) = 0.0;						 M(3, 2) = -1.0; M(3, 3) = 0.0;
+
+		matrix<double> MIe(4, 4);
+		MIe.fill(0.0);
+		MIe(0, 0) = 1.0;
+		MIe(1, 1) = 0.5;
+		MIe(1, 3) = 3.5;
+		MIe(2, 3) = -1.0;
+		MIe(3, 2) = -0.45;
+		MIe(3, 3) = 0.55;
+
+		matrix<double> MI(4, 4);
+		ensure(matrix<double>::invert4x4(M, MI));
+		ensure(MI.is_close(MIe, std::numeric_limits<double>::epsilon()));
+	}
 };

@@ -665,8 +665,6 @@ template <typename T>
 void matrix<T>::as_array(T* array) const
 {
 	const size_t n = m_n_cols * m_n_rows;
-//	if ((sizeof (array) / sizeof (T)) != n)
-//		throw std::runtime_error("no");
 
 	size_t col_it = this->c_begin();
 	size_t row_it = this->r_begin();
@@ -684,6 +682,167 @@ void matrix<T>::as_array(T* array) const
 			col_it++;
 		}
 	}
+}
+
+//static
+template <typename T>
+bool matrix<T>::invert4x4(const matrix<T>& m, matrix<T>& m_inv)
+{
+	// ganked from GLU
+	matrix<T> r(4, 8);
+
+	r(0, 0) = m(0, 0);	r(0, 1) = m(0, 1);	r(0, 2) = m(0, 2);	r(0, 3) = m(0, 3);
+	r(0, 4) = 1.0;		r(0, 5) = 0.0;		r(0, 6) = 0.0;		r(0, 7) = 0.0;
+	r(1, 0) = m(1, 0);	r(1, 1) = m(1, 1);	r(1, 2) = m(1, 2);	r(1, 3) = m(1, 3);
+	r(1, 4) = 0.0;		r(1, 5) = 1.0;		r(1, 6) = 0.0;		r(1, 7) = 0.0;
+	r(2, 0) = m(2, 0);	r(2, 1) = m(2, 1);	r(2, 2) = m(2, 2);	r(2, 3) = m(2, 3);
+	r(2, 4) = 0.0;		r(2, 5) = 0.0;		r(2, 6) = 1.0;		r(2, 7) = 0.0;
+	r(3, 0) = m(3, 0);	r(3, 1) = m(3, 1);	r(3, 2) = m(3, 2);	r(3, 3) = m(3, 3);
+	r(3, 4) = 0.0;		r(3, 5) = 0.0;		r(3, 6) = 0.0;		r(3, 7) = 1.0;
+
+	/* choose pivot or die */
+	if (abs(r(3, 0)) > abs(r(2, 0)))
+		r.row_swap(3, 2);
+	if (abs(r(2, 0)) > abs(r(1, 0)))
+		r.row_swap(2, 1);
+	if (abs(r(1, 0)) > abs(r(0, 0)))
+		r.row_swap(1, 0);
+	if (r(0, 0) == T(0))
+		return false;
+
+	/* eliminate first variable */
+	T m0, m1, m2, m3, s = T(0);
+	m1 = r(1, 0) / r(0, 0);
+	m2 = r(2, 0) / r(0, 0);
+	m3 = r(3, 0) / r(0, 0);
+	s = r(0, 1);
+	r(1, 1) -= m1 * s;
+	r(2, 1) -= m2 * s;
+	r(3, 1) -= m3 * s;
+	s = r(0, 2);
+	r(1, 2) -= m1 * s;
+	r(2, 2) -= m2 * s;
+	r(3, 2) -= m3 * s;
+	s = r(0, 3);
+	r(1, 3) -= m1 * s;
+	r(2, 3) -= m2 * s;
+	r(3, 3) -= m3 * s;
+	s = r(0, 4);
+	if (s != T(0))
+	{
+		r(1, 4) -= m1 * s;
+		r(2, 4) -= m2 * s;
+		r(3, 4) -= m3 * s;
+	}
+	s = r(0, 5);
+	if (s != T(0))
+	{
+		r(1, 5) -= m1 * s;
+		r(2, 5) -= m2 * s;
+		r(3, 5) -= m3 * s;
+	}
+	s = r(0, 6);
+	if (s != T(0))
+	{
+		r(1, 6) -= m1 * s;
+		r(2, 6) -= m2 * s;
+		r(3, 6) -= m3 * s;
+	}
+	s = r(0, 7);
+	if (s != T(0))
+	{
+		r(1, 7) -= m1 * s;
+		r(2, 7) -= m2 * s;
+		r(3, 7) -= m3 * s;
+	}
+	/* choose pivot - or die */
+	if (abs(r(3, 1)) > abs(r(2, 1)))
+		r.row_swap(3, 2);
+	if (abs(r(2, 1)) > abs(r(1, 1)))
+		r.row_swap(2, 1);
+	if (T(0) == r(1, 1))
+		return false;
+	/* eliminate second variable */
+	m2 = r(2, 1) / r(1, 1);
+	m3 = r(3, 1) / r(1, 1);
+	r(2, 2) -= m2 * r(1, 2);
+	r(3, 2) -= m3 * r(1, 2);
+	r(2, 3) -= m2 * r(1, 3);
+	r(3, 3) -= m3 * r(1, 3);
+	s = r(1, 4);
+	if (T(0) != s)
+	{
+		r(2, 4) -= m2 * s;
+		r(3, 4) -= m3 * s;
+	}
+	s = r(1, 5);
+	if (T(0) != s)
+	{
+		r(2, 5) -= m2 * s;
+		r(3, 5) -= m3 * s;
+	}
+	s = r(1, 6);
+	if (T(0) != s)
+	{
+		r(2, 6) -= m2 * s;
+		r(3, 6) -= m3 * s;
+	}
+	s = r(1, 7);
+	if (T(0) != s)
+	{
+		r(2, 7) -= m2 * s;
+		r(3, 7) -= m3 * s;
+	}
+	/* choose pivot - or die */
+	if (abs(r(3, 2)) > abs(r(2, 2)))
+		r.row_swap(3, 2);
+	if (T(0) == r(2, 2))
+		return false;
+	/* eliminate third variable */
+	m3 = r(3, 2) / r(2, 2);
+	r(3, 3) -= m3 * r(2, 3), r(3, 4) -= m3 * r(2, 4),
+		r(3, 5) -= m3 * r(2, 5), r(3, 6) -= m3 * r(2, 6), r(3, 7) -= m3 * r(2, 7);
+	/* last check */
+	if (T(0) == r(3, 3))
+		return 0;
+	s = 1.0 / r(3, 3);		/* now back substitute row 3 */
+	r(3, 4) *= s;
+	r(3, 5) *= s;
+	r(3, 6) *= s;
+	r(3, 7) *= s;
+	m2 = r(2, 3);			/* now back substitute row 2 */
+	s = 1.0 / r(2, 2);
+	r(2, 4) = s * (r(2, 4) - r(3, 4) * m2), r(2, 5) = s * (r(2, 5) - r(3, 5) * m2),
+		r(2, 6) = s * (r(2, 6) - r(3, 6) * m2), r(2, 7) = s * (r(2, 7) - r(3, 7) * m2);
+	m1 = r(1, 3);
+	r(1, 4) -= r(3, 4) * m1, r(1, 5) -= r(3, 5) * m1,
+		r(1, 6) -= r(3, 6) * m1, r(1, 7) -= r(3, 7) * m1;
+	m0 = r(0, 3);
+	r(0, 4) -= r(3, 4) * m0, r(0, 5) -= r(3, 5) * m0,
+		r(0, 6) -= r(3, 6) * m0, r(0, 7) -= r(3, 7) * m0;
+	m1 = r(1, 2);			/* now back substitute row 1 */
+	s = 1.0 / r(1, 1);
+	r(1, 4) = s * (r(1, 4) - r(2, 4) * m1), r(1, 5) = s * (r(1, 5) - r(2, 5) * m1),
+		r(1, 6) = s * (r(1, 6) - r(2, 6) * m1), r(1, 7) = s * (r(1, 7) - r(2, 7) * m1);
+	m0 = r(0, 2);
+	r(0, 4) -= r(2, 4) * m0, r(0, 5) -= r(2, 5) * m0,
+		r(0, 6) -= r(2, 6) * m0, r(0, 7) -= r(2, 7) * m0;
+	m0 = r(0, 1);			/* now back substitute row 0 */
+	s = 1.0 / r(0, 0);
+	r(0, 4) = s * (r(0, 4) - r(1, 4) * m0), r(0, 5) = s * (r(0, 5) - r(1, 5) * m0),
+		r(0, 6) = s * (r(0, 6) - r(1, 6) * m0), r(0, 7) = s * (r(0, 7) - r(1, 7) * m0);
+
+	m_inv(0, 0) = r(0, 4);
+	m_inv(0, 1) = r(0, 5), m_inv(0, 2) = r(0, 6);
+	m_inv(0, 3) = r(0, 7), m_inv(1, 0) = r(1, 4);
+	m_inv(1, 1) = r(1, 5), m_inv(1, 2) = r(1, 6);
+	m_inv(1, 3) = r(1, 7), m_inv(2, 0) = r(2, 4);
+	m_inv(2, 1) = r(2, 5), m_inv(2, 2) = r(2, 6);
+	m_inv(2, 3) = r(2, 7), m_inv(3, 0) = r(3, 4);
+	m_inv(3, 1) = r(3, 5), m_inv(3, 2) = r(3, 6);
+	m_inv(3, 3) = r(3, 7);
+
+	return true;
 }
 
 template <typename T>

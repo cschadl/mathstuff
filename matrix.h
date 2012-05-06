@@ -198,6 +198,13 @@ public:
 	template <typename _T>
 	friend matrix<_T> operator-(const matrix<_T>& m);	// negation
 
+	// misc
+
+	/** Too lazy to write a general matrix inversion (e.g. with LU decomposition)
+	 *  but a 4x4 matrix inversion is often useful.
+	 */
+	static bool invert4x4(const matrix<T>& m, matrix<T>& m_inv);
+
 protected:
 	// indexers
 	class row_major_indexer : public indexer
