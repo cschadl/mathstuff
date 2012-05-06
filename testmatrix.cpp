@@ -332,7 +332,7 @@ namespace tut
 		ensure(maths::close(pt2[2], -0.220, tol));
 	}
 
-	template<> template<>
+	template <> template <>
 	void matrix_tests::object::test<8>()
 	{
 		set_test_name("4x4 matrix inversion");
