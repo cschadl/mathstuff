@@ -662,6 +662,31 @@ std::valarray<T> matrix<T>::svd_solve(const matrix<T>& U, const std::valarray<T>
 }
 
 template <typename T>
+void matrix<T>::as_array(T* array) const
+{
+	const size_t n = m_n_cols * m_n_rows;
+//	if ((sizeof (array) / sizeof (T)) != n)
+//		throw std::runtime_error("no");
+
+	size_t col_it = this->c_begin();
+	size_t row_it = this->r_begin();
+
+	for (size_t i = 0 ; i < n ; i++)
+	{
+		array[i] = (*this)(row_it, col_it);	// eww
+		if (i != 0 && (i + 1) % m_n_cols == 0)
+		{
+			row_it++;
+			col_it = 0;
+		}
+		else
+		{
+			col_it++;
+		}
+	}
+}
+
+template <typename T>
 T& matrix<T>::operator()(size_t i, size_t j)
 {
 	if (i < r_begin() || i > r_end() || j < c_begin() || j > c_end())

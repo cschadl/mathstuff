@@ -52,8 +52,13 @@ public:
 	virtual T max_norm() const;
 	virtual T inner_product(const n_vector<T, N>& rhs) const;
 
+	// TODO - bounds checking (std::valarray fails it)
 	T& operator[](unsigned int i) { return m_v[i]; }
 	const T& operator[](unsigned int i) const { return m_v[i]; }
+
+	const T& x() const { return m_v[0]; }
+	const T& y() const { return m_v[1]; }
+	const T& z() const { return m_v[2]; }
 
 	bool operator==(const n_vector<T, N>& rhs) const;
 	bool operator!=(const n_vector<T, N>& rhs) const { return !(*this == rhs); }

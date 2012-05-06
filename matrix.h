@@ -15,6 +15,7 @@
 #include <memory>
 #include <algorithm>
 #include <limits>
+#include <exception>
 
 #include <assert.h>
 
@@ -155,6 +156,11 @@ public:
 	 *  \ bug		BROKEN!
 	 */
 	static std::valarray<T> svd_solve(const matrix<T>& U, const std::valarray<T>& w, const matrix<T>& V, const std::valarray<T>& b);
+
+	/**
+	 * Loads this matrix into the specified array, in row major format
+	 */
+	void as_array(T* array) const;
 
 	virtual const T& operator()(size_t i, size_t j) const;
 	virtual T& operator()(size_t i, size_t j);
