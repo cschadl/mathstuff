@@ -77,9 +77,9 @@ T pythag(const T& a, const T& b)
 	T absa = abs(a);
 	T absb = abs(b);
 	if (absa > absb)
-		return absa * sqrt(1.0 + (absb / absa) * (absb / absa));
+		return absa * sqrt(T(1) + (absb / absa) * (absb / absa));
 	else
-		return (absb == 0.0 ? 0.0 : absb * sqrt(1.0 + (absa / absb) * (absa / absb)));
+		return (absb == T(0) ? T(0) : absb * sqrt(T(1) + (absa / absb) * (absa / absb)));
 }
 
 template <typename T>
@@ -101,6 +101,13 @@ inline
 T min(const T& a, const T& b)
 {
 	return a < b ? a : b;
+}
+
+template <typename T>
+inline
+T deg_to_rad(T d)
+{
+	return d * (M_PI / T(180));
 }
 
 };

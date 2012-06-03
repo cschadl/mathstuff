@@ -20,6 +20,7 @@
 #include <assert.h>
 
 #include "misc.h"
+#include "vectors.h"
 
 namespace maths
 {
@@ -204,6 +205,11 @@ public:
 	 *  but a 4x4 matrix inversion is often useful.
 	 */
 	static bool invert4x4(const matrix<T>& m, matrix<T>& m_inv);
+
+	/**
+	 *  Construct the 4x4 rotation matrix for rotating a 3-vector about the given axis.
+	 */
+	static matrix<T> rotation(const maths::vector3f& axis, T angle_deg);
 
 protected:
 	// indexers

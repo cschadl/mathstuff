@@ -28,7 +28,6 @@ class n_vector
 {
 protected:
 	std::valarray<T> m_v;	// vector elements
-	n_vector(const std::valarray<T>& va) : m_v(va) { assert(m_v.size() == N); }
 
 	enum { Dim = N };
 
@@ -37,6 +36,7 @@ public:
 	n_vector(T x, T y);				// 2-vector
 	n_vector(T x, T y, T z);		// 3-vector
 	n_vector(T a, T b, T c, T d);	// 4-vector
+	n_vector(const std::valarray<T>& va) : m_v(va) { assert(m_v.size() == N); }
 	virtual ~n_vector() { }
 
 	/** The number of elements in the vector **/
@@ -84,6 +84,8 @@ public:
 	n_vector<T, N>& operator-=(const n_vector<T, N>& v) { m_v -= v.m_v; return *this; }
 	n_vector<T, N>& operator*=(const T c) { m_v *= c; return *this; }
 	n_vector<T, N>& operator/=(const T d) { m_v /= d; return *this; }
+
+	const std::valarray<T>& get_valarray() const { return m_v; }
 
 	// unit vectors
 	// these don't work very well (need to be called like vector3d::n_vector<double>i()

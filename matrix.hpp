@@ -845,6 +845,45 @@ bool matrix<T>::invert4x4(const matrix<T>& m, matrix<T>& m_inv)
 	return true;
 }
 
+//static
+template <typename T>
+matrix<T> matrix<T>::rotation(const vector3f& axis, T angle_deg)
+{
+	// Make sure axis is a unit vector
+	const vector3f& uvw = axis.is_unit() ? axis : axis.make_unit();
+	const T t = maths::deg_to_rad(angle_deg);
+
+	const T& u = uvw.x();	// save some typing...
+	const T& v = uvw.y();
+	const T& w = uvw.z();
+	const T u2 = u * u;
+	const T v2 = v * v;
+	const T w2 = w * w;
+	const T uv = u * v;
+	const T uw = u * w;
+	const T vw = v * w;
+
+	matrix<T> m(4, 4);		// our rotation matrix
+	m(0, 0) = u2 + (T(1) - u2) * cos(t);
+	m(0, 1) = uv * (T(1) - cos(t)) - (w * sin(t));
+	m(0, 2) = uw * (T(1) - cos(t)) + (v * sin(t));
+	m(0, 3) = T(0);
+
+	m(1, 0) = uv * (T(1) - cos(t)) + (w * sin(t));
+	m(1, 1) = v2 + (T(1) - v2) * cos(t);
+	m(1, 2) = vw * (T(1) - cos(t)) - (u * sin(t));
+	m(1, 3) = T(0);
+
+	m(2, 0) = uw * (T(1) - cos(t)) - (v * sin(t));
+	m(2, 1) = vw * (T(1) - cos(t)) + (u * sin(t));
+	m(2, 2) = w2 + (T(1) - w2) * cos(t);
+	m(2, 3) = T(0);
+
+	m(3, 0) = T(0); m(3, 1)= T(0); m(3, 2) = T(0); m(3, 3) = T(1);
+
+	return m;
+}
+
 template <typename T>
 T& matrix<T>::operator()(size_t i, size_t j)
 {
