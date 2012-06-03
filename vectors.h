@@ -65,6 +65,7 @@ public:
 
 	bool is_close(const n_vector<T, N>& v, const T tol) const;
 	bool is_null() const;
+	bool is_unit() const;
 
 	// Arithmetic operations
 	template<typename U, int M> friend n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
@@ -79,10 +80,10 @@ public:
 	template<typename U, int M> friend n_vector<U, M> outer_product(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
 	template<typename U, int M> friend n_vector<U, M> cross(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
 
-	virtual n_vector<T, N>& operator+=(const n_vector<T, N>& v) { m_v += v.m_v; return *this; }
-	virtual n_vector<T, N>& operator-=(const n_vector<T, N>& v) { m_v -= v.m_v; return *this; }
-	virtual n_vector<T, N>& operator*=(const T c) { m_v *= c; return *this; }
-	virtual n_vector<T, N>& operator/=(const T d) { m_v /= d; return *this; }
+	n_vector<T, N>& operator+=(const n_vector<T, N>& v) { m_v += v.m_v; return *this; }
+	n_vector<T, N>& operator-=(const n_vector<T, N>& v) { m_v -= v.m_v; return *this; }
+	n_vector<T, N>& operator*=(const T c) { m_v *= c; return *this; }
+	n_vector<T, N>& operator/=(const T d) { m_v /= d; return *this; }
 
 	// unit vectors
 	// these don't work very well (need to be called like vector3d::n_vector<double>i()
@@ -173,6 +174,12 @@ bool n_vector<T, N>::is_null() const
 {
 	const T tol = std::numeric_limits<T>::epsilon();	// should be OK for comparing to 0
 	return is_close(n_vector<T, N>(), tol);
+}
+
+template <typename T, int N>
+bool n_vector<T, N>::is_unit() const
+{
+	return close(length(), T(1.0), std::numeric_limits<T>::epsilon());
 }
 
 template <typename T, int N>
