@@ -88,6 +88,7 @@ public:
 	bool operator==(const matrix<T>& rhs) const;
 	bool operator!=(const matrix<T>& rhs) const { return !(*this == rhs); }
 	bool is_close(const matrix<T>& rhs, const T& tol) const;
+	bool is_null() const;	// No tolerance, returns true if all entries are exactly 0
 
 	matrix<T>& transpose();
 	matrix<T>  get_transpose() const;
@@ -210,6 +211,7 @@ public:
 	 *  Construct the 4x4 rotation matrix for rotating a 3-vector about the given axis.
 	 */
 	static matrix<T> rotation(const maths::vector3f& axis, T angle_deg);
+	static matrix<T> translation(const maths::vector3f& v);
 
 protected:
 	// indexers

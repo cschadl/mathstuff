@@ -108,6 +108,16 @@ bool matrix<T>::is_close(const matrix<T>& rhs, const T& tol) const
 }
 
 template <typename T>
+bool matrix<T>::is_null() const
+{
+	// Probalby not very efficient...
+	matrix<T> cmp = *this;	// cmp inherits our indexing scheme
+	cmp.fill(T(0));
+
+	return *this == cmp;
+}
+
+template <typename T>
 matrix<T>& matrix<T>::transpose()
 {
 	// just set the indexer type to the transpose of the current index type
@@ -882,6 +892,18 @@ matrix<T> matrix<T>::rotation(const vector3f& axis, T angle_deg)
 	m(3, 0) = T(0); m(3, 1)= T(0); m(3, 2) = T(0); m(3, 3) = T(1);
 
 	return m;
+}
+
+//static
+template <typename T>
+matrix<T> matrix<T>::translation(const vector3f& v)
+{
+	matrix<T> t = matrix<T>::I(4);
+	t(0, 3) = v.x();
+	t(1, 3) = v.y();
+	t(2, 3) = v.z();
+
+	return t;
 }
 
 template <typename T>
