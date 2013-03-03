@@ -42,8 +42,9 @@ public:
 	/** The number of elements in the vector **/
 	int size() const { return Dim; }
 
-	virtual T length() const;					/** length **/
-	virtual T length_sq() const;				/** length squared (faster, but less percise than length() (?) **/
+	virtual T length() const;								/** length **/
+	virtual T length_sq() const;							/** length squared (faster, but less percise than length() (?) **/
+	virtual T distance_sq(const n_vector<T, N> & q) const;	/** The squared distance from this point to the point q */
 
 	virtual n_vector<T, N>  make_unit() const;	/** make a unit vector from this vector **/
 	virtual n_vector<T, N>& unit();				/** unitize this vector **/
@@ -163,12 +164,7 @@ bool n_vector<T, N>::operator==(const n_vector<T, N>& rhs) const
 template <typename T, int N>
 bool n_vector<T, N>::is_close(const n_vector<T, N>& v, const T tol) const
 {
-	// I guess this could get hairy if T is not scalar...
-	for (int i = 0 ; i < Dim ; i++)
-		if (!close(m_v[i], v.m_v[i], tol))
-			return false;
-
-	return true;
+	return maths::close(distance_sq(v), 0.0, tol * tol);
 }
 
 template <typename T, int N>
@@ -193,11 +189,14 @@ T n_vector<T, N>::length() const
 template <typename T, int N>
 T n_vector<T, N>::length_sq() const
 {
-	T length_sq = (T)0;
-	for (int i = 0 ; i < N ; i++)
-		length_sq += pow(m_v[i], (T)2);
+	const n_vector<T, N> & v = *this;
+	return v * v;
+}
 
-	return length_sq;
+template <typename T, int N>
+T n_vector<T, N>::distance_sq(const n_vector<T, N>& q) const
+{
+	return ((*this) - q).length_sq();
 }
 
 template <typename T, int N>

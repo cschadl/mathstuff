@@ -5,18 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../test_mathstuff.cpp \
+../testgeom.cpp \
 ../testmatrix.cpp \
 ../testquaternion.cpp \
 ../testvector.cpp 
 
 OBJS += \
 ./test_mathstuff.o \
+./testgeom.o \
 ./testmatrix.o \
 ./testquaternion.o \
 ./testvector.o 
 
 CPP_DEPS += \
 ./test_mathstuff.d \
+./testgeom.d \
 ./testmatrix.d \
 ./testquaternion.d \
 ./testvector.d 

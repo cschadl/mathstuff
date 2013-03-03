@@ -41,7 +41,7 @@ namespace tut
 		const quatd ki = k * i;
 		const quatd ik = i * k;
 
-		const double tol = std::numeric_limits<double>::min();
+		const double tol = std::numeric_limits<double>::epsilon();
 		ensure(isq.is_close(-1.0, tol));
 		ensure(jsq.is_close(-1.0, tol));
 		ensure(ksq.is_close(-1.0, tol));

@@ -42,7 +42,7 @@ namespace tut
 	{
 		set_test_name("inner product");
 
-		const double tol = std::numeric_limits<double>::min();
+		const double tol = std::numeric_limits<double>::epsilon();
 
 		ensure(close(i.inner_product(j), 0.0, tol));
 		ensure(close(j.inner_product(i), 0.0, tol));
@@ -83,7 +83,7 @@ namespace tut
 		vector3d v2(0.5, 0.0, 0.0);
 		vector3d v3(0.0, 0.0, 0.5);
 
-		const double tol = std::numeric_limits<double>::min();
+		const double tol = std::numeric_limits<double>::epsilon();
 		ensure((v1 + v2).is_close(vector3d(0.5, 0.5, 0.0), tol));
 		ensure((v2 + v2).is_close(vector3d(1.0, 0.0, 0.0), tol));
 		ensure(((v1 + v2) - v2).is_close(v1, tol));
