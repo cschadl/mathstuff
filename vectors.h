@@ -57,9 +57,12 @@ public:
 	T& operator[](unsigned int i) { return m_v[i]; }
 	const T& operator[](unsigned int i) const { return m_v[i]; }
 
-	const T& x() const { return m_v[0]; }
-	const T& y() const { return m_v[1]; }
-	const T& z() const { return m_v[2]; }
+	const T& x() const 	{ return m_v[0]; }
+	      T& x()		{ return m_v[0]; }
+	const T& y() const 	{ return m_v[1]; }
+		  T& y()		{ return m_v[1]; }
+	const T& z() const	{ return m_v[2]; }
+		  T& z()		{ return m_v[2]; }
 
 	bool operator==(const n_vector<T, N>& rhs) const;
 	bool operator!=(const n_vector<T, N>& rhs) const { return !(*this == rhs); }
