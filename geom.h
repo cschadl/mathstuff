@@ -32,6 +32,9 @@ public:
 	const n_vector<T, 3>& max() const { return m_max; }
 	n_vector<T, 3>  center() const;
 
+	bool operator==(const bbox_3<T>& bbox) const;
+	bool operator!=(const bbox_3<T>& bbox) const { return !((*this) == bbox); }
+
 	bool is_empty() const;
 	bool is_point() const;
 
@@ -62,17 +65,17 @@ public:
 
 template <typename T>
 bbox_3<T>::bbox_3()
-: m_min(T(0), T(0), T(0))
-, m_max(T(0), T(0), T(0))
+: m_min(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max())
+, m_max(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max())
 {
-
+	// box is empty if min / max is std::numeric_limits<T>::max()
 }
 
 template <typename T>
 bool bbox_3<T>::is_empty() const
 {
-	bbox_3 empty_bbox;
-	return (*this) == empty_bbox;
+	return 	m_min == n_vector<T, 3>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max()) &&
+			m_max == n_vector<T, 3>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
 }
 
 template <typename T>
@@ -145,6 +148,14 @@ void bbox_3<T>::get_corners(OutputIter it) const
 template <typename T>
 bool bbox_3<T>::add_point(const n_vector<T, 3>& p)
 {
+	if (is_empty())
+	{
+		m_min = p;
+		m_max = p;
+
+		return true;
+	}
+
 	if (contains(p))
 		return false;
 
@@ -160,7 +171,7 @@ bool bbox_3<T>::add_point(const n_vector<T, 3>& p)
 	{	m_max.y() = p.y();	changed = true; }
 
 	if (p.z() < m_min.z())
-	{	m_min.z() = p.y();	changed = true; }
+	{	m_min.z() = p.z();	changed = true; }
 	else if (p.z() > m_max.z())
 	{	m_max.z() = p.z();	changed = true; }
 
