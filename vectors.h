@@ -42,16 +42,16 @@ public:
 	/** The number of elements in the vector **/
 	int size() const { return Dim; }
 
-	virtual T length() const;								/** length **/
-	virtual T length_sq() const;							/** length squared (faster, but less percise than length() (?) **/
-	virtual T distance_sq(const n_vector<T, N> & q) const;	/** The squared distance from this point to the point q */
+	T length() const;								/** length **/
+	T length_sq() const;							/** length squared (faster, but less percise than length() (?) **/
+	T distance_sq(const n_vector<T, N> & q) const;	/** The squared distance from this point to the point q */
 
-	virtual n_vector<T, N>  make_unit() const;	/** make a unit vector from this vector **/
-	virtual n_vector<T, N>& unit();				/** unitize this vector **/
+	n_vector<T, N>  make_unit() const;	/** make a unit vector from this vector **/
+	n_vector<T, N>& unit();				/** unitize this vector **/
 
-	virtual T norm(unsigned int p) const;
-	virtual T max_norm() const;
-	virtual T inner_product(const n_vector<T, N>& rhs) const;
+	T norm(unsigned int p) const;
+	T max_norm() const;
+	T inner_product(const n_vector<T, N>& rhs) const;
 
 	// TODO - bounds checking (std::valarray fails it)
 	T& operator[](unsigned int i) { return m_v[i]; }

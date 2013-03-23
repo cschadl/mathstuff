@@ -63,6 +63,9 @@ public:
 	template <typename Iter> bool add_points(Iter begin, Iter end);
 };
 
+typedef bbox_3<double> bbox3d;
+typedef bbox_3<float> bbox3f;
+
 template <typename T>
 bbox_3<T>::bbox_3()
 : m_min(std::numeric_limits<T>::max(), std::numeric_limits<T>::max(), std::numeric_limits<T>::max())
@@ -204,6 +207,12 @@ public:
 	/** Explicitly specify the normal */
 	triangle_3(const n_vector<T, 3>& a, const n_vector<T, 3>& b, const n_vector<T, 3>& c, const n_vector<T, 3>& n);
 
+	/** Default constructor (for STL contianers) */
+	triangle_3();
+
+	triangle_3(const triangle_3<T>& t);
+	triangle_3<T>& operator=(const triangle_3<T>& t);
+
 	/** Two triangles T1 and T2 are equal iff there is a cyclic permutation from the
 	 *  vertices of T1 onto the vertices of T2.
 	 */
@@ -251,6 +260,35 @@ triangle_3<T>::triangle_3(const n_vector<T, 3>& a, const n_vector<T, 3>& b, cons
 	const_cast< n_vector<T, 3>& >(m_verts[1]) = b;
 	const_cast< n_vector<T, 3>& >(m_verts[2]) = c;
 	const_cast< n_vector<T, 3>& >(m_normal) = n;
+}
+
+template <typename T>
+triangle_3<T>::triangle_3()
+{
+	const_cast< n_vector<T, 3>& >(m_verts[0]) = T(0);
+	const_cast< n_vector<T, 3>& >(m_verts[1]) = T(0);
+	const_cast< n_vector<T, 3>& >(m_verts[2]) = T(0);
+	const_cast< n_vector<T, 3>& >(m_normal) = n_vector<T, 3>(T(0), T(0), T(0));
+}
+
+template <typename T>
+triangle_3<T>::triangle_3(const maths::triangle_3<T>& t)
+{
+	const_cast< n_vector<T, 3>& >(m_verts[0]) = t.m_verts[0];
+	const_cast< n_vector<T, 3>& >(m_verts[1]) = t.m_verts[1];
+	const_cast< n_vector<T, 3>& >(m_verts[2]) = t.m_verts[2];
+	const_cast< n_vector<T, 3>& >(m_normal) = t.m_normal;
+}
+
+template <typename T>
+triangle_3<T>& triangle_3<T>::operator=(const triangle_3<T>& t)
+{
+	const_cast< n_vector<T, 3>& >(m_verts[0]) = t.m_verts[0];
+	const_cast< n_vector<T, 3>& >(m_verts[1]) = t.m_verts[1];
+	const_cast< n_vector<T, 3>& >(m_verts[2]) = t.m_verts[2];
+	const_cast< n_vector<T, 3>& >(m_normal) = t.m_normal;
+
+	return *this;
 }
 
 template <typename T>
