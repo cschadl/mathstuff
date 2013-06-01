@@ -37,7 +37,8 @@ public:
 	n_vector(T x, T y, T z);		// 3-vector
 	n_vector(T a, T b, T c, T d);	// 4-vector
 	n_vector(const std::valarray<T>& va) : m_v(va) { assert(m_v.size() == N); }
-	virtual ~n_vector() { }
+	n_vector(const T* data, size_t n) : m_v(data, n) { }
+	~n_vector() { }
 
 	/** The number of elements in the vector **/
 	int size() const { return Dim; }
