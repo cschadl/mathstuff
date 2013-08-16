@@ -265,9 +265,9 @@ triangle_3<T>::triangle_3(const n_vector<T, 3>& a, const n_vector<T, 3>& b, cons
 template <typename T>
 triangle_3<T>::triangle_3()
 {
-	const_cast< n_vector<T, 3>& >(m_verts[0]) = T(0);
-	const_cast< n_vector<T, 3>& >(m_verts[1]) = T(0);
-	const_cast< n_vector<T, 3>& >(m_verts[2]) = T(0);
+	const_cast< n_vector<T, 3>& >(m_verts[0]) = n_vector<T, 3>(T(0), T(0), T(0));
+	const_cast< n_vector<T, 3>& >(m_verts[1]) = n_vector<T, 3>(T(0), T(0), T(0));
+	const_cast< n_vector<T, 3>& >(m_verts[2]) = n_vector<T, 3>(T(0), T(0), T(0));
 	const_cast< n_vector<T, 3>& >(m_normal) = n_vector<T, 3>(T(0), T(0), T(0));
 }
 
