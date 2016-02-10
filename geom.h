@@ -237,6 +237,10 @@ public:
 	//bool is_point_on(const n_vector<T, 3>& point) const;
 	//bool line_intersection(const line<T>& line, n_vector<T, 3>& intersect_pt) const;
 	//bool barycentric_point(const n_vector<T, 3>& point, n_vector<T, 2>& barycentric_pt) const;
+
+	// Area and signed volume
+	T area() const;
+	T signed_volume() const;
 };
 
 typedef triangle_3<double> triangle3d;
@@ -328,6 +332,21 @@ bbox_3<T> triangle_3<T>::bbox() const
 	bbox.add_points(m_verts, m_verts + 3);
 
 	return bbox;
+}
+
+template <typename T>
+T triangle_3<T>::signed_volume() const
+{
+	return m_verts[0] * maths::cross(m_verts[1], m_verts[2]) / T(6);
+}
+
+template <typename T>
+T triangle_3<T>::area() const
+{
+	n_vector<T, 3> a = m_verts[1] - m_verts[0];
+	n_vector<T, 3> b = m_verts[2] - m_verts[0];
+
+	return maths::cross(a, b).norm(2) / T(2);
 }
 
 };

@@ -250,8 +250,8 @@ const diag_matrix<T>* matrix<T>::diag(const size_t n, const T& x)
 template <typename T>
 bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 {
-	scoped_index_change this_index(&a, a.m_idx->make_one());	// used one-based indexing for this algorithm
-
+	// used one-based indexing for this algorithm
+	scoped_index_change this_index(&a, a.m_idx->make_one());	
 	const size_t m = a.rows();
 	const size_t n = a.cols();
 
@@ -260,8 +260,8 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	w = std::valarray<T>((T)0, n);
 	V = matrix<T>(n, n);
 
-	scoped_index_change Vt_index(&V, V.m_idx->make_one());	// make sure V is indexed 1..n
-
+	// make sure V is indexed 1..n
+	scoped_index_change Vt_index(&V, V.m_idx->make_one());	
 	matrix<T> rv1(1, n);
 	rv1.m_idx = std::auto_ptr<indexer>(new row_major_1_indexer(&rv1));
 
