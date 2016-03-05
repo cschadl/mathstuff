@@ -30,6 +30,8 @@ namespace tut
 		{
 			vector2d point;
 			point_wrapper(double x, double y) : point(x, y) { }
+
+			const vector2d& p() const { return point; }
 		};
 	};
 
@@ -104,7 +106,9 @@ namespace tut
 		points.push_back(test_geom_data::point_wrapper(1, 1));
 		points.push_back(test_geom_data::point_wrapper(-1, 1));
 
-		vector2d c = centroid(points.begin(), points.end(), [](const test_geom_data::point_wrapper & p) { return p.point; });
+		vector2d c = centroid(points.begin(), points.end(),
+			[](const test_geom_data::point_wrapper & pw) { return pw.p(); });
+
 		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
 		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
 	}
