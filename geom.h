@@ -385,9 +385,9 @@ auto centroid(InputIterator begin, InputIterator end) -> typename std::decay<dec
 }
 
 template <typename InputIterator, typename Func>
-auto centroid(InputIterator begin, InputIterator end, Func f) -> decltype(f(*begin))
+auto centroid(InputIterator begin, InputIterator end, Func f) -> typename std::decay<decltype(f(*begin))>::type
 {
-	typedef decltype(f(*begin)) Point_t;
+	typedef typename std::decay<decltype(f(*begin))>::type Point_t;
 	typedef typename Point_t::value_type value_type;
 
 	Point_t out;
