@@ -8,9 +8,7 @@
 #include "geom.h"
 #include "tut.h"
 
-using maths::triangle3d;
-using maths::vector3d;
-using maths::bbox_3;
+using namespace maths;
 
 namespace tut
 {
@@ -27,6 +25,12 @@ namespace tut
 		{
 
 		}
+
+		struct point_wrapper
+		{
+			vector2d point;
+			point_wrapper(double x, double y) : point(x, y) { }
+		};
 	};
 
 	typedef test_group<test_geom_data> test_geom_data_t;
@@ -71,5 +75,37 @@ namespace tut
 		ensure(maths::close(bbox.extent_x(), 2.0, std::numeric_limits<double>::epsilon()));
 		ensure(maths::close(bbox.extent_y(), 1.0, std::numeric_limits<double>::epsilon()));
 		ensure(maths::close(bbox.extent_z(), 1.0, std::numeric_limits<double>::epsilon()));
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<5>()
+	{
+		set_test_name("Centroid");
+
+		std::vector<vector2d> square;
+		square.push_back(vector2d(-1, -1));
+		square.push_back(vector2d(1, -1));
+		square.push_back(vector2d(1, 1));
+		square.push_back(vector2d(-1, 1));
+
+		vector2d c = centroid(square.begin(), square.end());
+		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
+		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<6>()
+	{
+		set_test_name("Centroid functor");
+
+		std::vector<test_geom_data::point_wrapper> points;
+		points.push_back(test_geom_data::point_wrapper(-1, -1));
+		points.push_back(test_geom_data::point_wrapper(1, -1));
+		points.push_back(test_geom_data::point_wrapper(1, 1));
+		points.push_back(test_geom_data::point_wrapper(-1, 1));
+
+		vector2d c = centroid(points.begin(), points.end(), [](const test_geom_data::point_wrapper & p) { return p.point; });
+		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
+		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
 	}
 };

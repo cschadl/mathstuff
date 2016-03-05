@@ -29,7 +29,9 @@ class n_vector
 protected:
 	std::valarray<T> m_v;	// vector elements
 
+public:
 	enum { Dim = N };
+	typedef T value_type;
 
 public:
 	n_vector() : m_v((T)0, N) { }
@@ -332,6 +334,17 @@ inline std::ostream& operator<<(std::ostream& os, const n_vector<U, M>& v)
 	os << ")";
 
 	return os;
+}
+
+template <typename TO, typename FROM, int M>
+inline n_vector<TO, M> convert(const n_vector<FROM, M>& src)
+{
+	n_vector<TO, M> out;
+
+	for (size_t i = 0 ; i < M ; i++)
+		out[i] = (TO) src[i];
+
+	return out;
 }
 
 };	// namespace maths

@@ -1,6 +1,8 @@
 #ifndef GEOM_H
 #define GEOM_H
 
+#include <type_traits>
+
 #include "vectors.h"
 #include "misc.h"
 
@@ -198,8 +200,10 @@ template <typename T>
 class triangle_3
 {
 private:
-	const n_vector<T, 3>	m_verts[3];
-	const n_vector<T, 3>	m_normal;
+	n_vector<T, 3>	m_verts[3];
+	n_vector<T, 3>	m_normal;
+
+	const n_vector<T, 3>&	calc_normal_();
 
 public:
 	/** Computes the normal from ABC (right-hand rule) */
@@ -224,7 +228,10 @@ public:
 
 	/** Gets the i-th vertex of the triangle modulo 3 */
 	const n_vector<T, 3>& vert(int i) const { return m_verts[i % 3]; }
+	// This seemed like a good idea until you realize that it fucks up the normal if the vert changes
+	//n_vector<T, 3>& vert(int i) { return m_verts[i % 3]; }
 	const n_vector<T, 3>& operator[](int i) const { return m_verts[i % 3]; }
+	//n_vector<T, 3>& operator[](int i) { return m_verts[i % 3]; }
 	const n_vector<T, 3>& normal() const { return m_normal; }
 
 	/** The same triangle, with the normal reversed */
@@ -247,6 +254,18 @@ typedef triangle_3<double> triangle3d;
 typedef triangle_3<float>  triangle3f;
 
 template <typename T>
+const n_vector<T, 3>& triangle_3<T>::calc_normal_()
+{
+	const n_vector<T, 3> & a = m_verts[0];
+	const n_vector<T, 3> & b = m_verts[1];
+	const n_vector<T, 3> & c = m_verts[2];
+
+	m_normal = ((b - a) % (c - a)).unit();
+
+	return m_normal;
+}
+
+template <typename T>
 triangle_3<T>::triangle_3(const n_vector<T, 3>& a, const n_vector<T, 3>& b, const n_vector<T, 3>& c)
 {
 	const_cast< n_vector<T, 3>& >(m_verts[0]) = a;
@@ -254,7 +273,7 @@ triangle_3<T>::triangle_3(const n_vector<T, 3>& a, const n_vector<T, 3>& b, cons
 	const_cast< n_vector<T, 3>& >(m_verts[2]) = c;
 
 	// compute the normal
-	const_cast< n_vector<T, 3>& >(m_normal) = ((b - a) % (c - a)).unit();
+	calc_normal_();
 }
 
 template<typename T>
@@ -347,6 +366,37 @@ T triangle_3<T>::area() const
 	n_vector<T, 3> b = m_verts[2] - m_verts[0];
 
 	return maths::cross(a, b).norm(2) / T(2);
+}
+
+// Compute the centroid of some group of things
+template <typename InputIterator>
+auto centroid(InputIterator begin, InputIterator end) -> typename std::decay<decltype(*begin)>::type
+{
+	typedef typename std::decay<decltype(*begin)>::type Point_t;
+	typedef typename Point_t::value_type value_type;
+
+	Point_t out;
+	for (InputIterator it = begin ; it != end ; ++it)
+		out += *it;
+
+	out = out / (value_type) std::distance(begin, end);
+
+	return out;
+}
+
+template <typename InputIterator, typename Func>
+auto centroid(InputIterator begin, InputIterator end, Func f) -> decltype(f(*begin))
+{
+	typedef decltype(f(*begin)) Point_t;
+	typedef typename Point_t::value_type value_type;
+
+	Point_t out;
+	for (InputIterator it = begin ; it != end ; ++it)
+		out += f(*it);
+
+	out = out / (value_type) std::distance(begin, end);
+
+	return out;
 }
 
 };
