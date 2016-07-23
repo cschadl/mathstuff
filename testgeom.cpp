@@ -9,7 +9,15 @@
 #include "primitive_fitting.h"
 #include "tut.h"
 
+#include <stdio.h>
+#include <unistd.h>
+#include <libgen.h>
+#include <sys/param.h>
+
 #include <random>
+#include <chrono>
+#include <stdexcept>
+#include <fstream>
 
 using namespace maths;
 
@@ -36,6 +44,32 @@ namespace tut
 
 			const vector2d& p() const { return point; }
 		};
+
+		static std::string test_data_path()
+		{
+			// Get path of TUT test data.
+			// We'll assume that it's one directory up in test_data/
+			// Note - this isn't portable at all
+			char tmp[32];
+			char path_buf[MAXPATHLEN];
+
+			::sprintf(tmp, "/proc/%d/exe", ::getpid());
+			const int bytes = std::min(::readlink(tmp, path_buf, MAXPATHLEN), (ssize_t)(MAXPATHLEN - 1));
+			if (bytes < 0)
+				throw std::runtime_error("Couldn't readlink() path");	// shouldn't happen...
+
+			const std::string cur_path = ::dirname(path_buf);
+
+			char cur_path_buf[MAXPATHLEN];	// because dirname() doesn't take a const char*...
+			std::size_t cur_path_len = cur_path.copy(cur_path_buf, cur_path.length());
+			cur_path_buf[cur_path_len] = '\0';
+
+			const std::string base_path = ::dirname(cur_path_buf);
+
+			std::string path = base_path + "/test_data";
+
+			return path;
+		}
 	};
 
 	typedef test_group<test_geom_data> test_geom_data_t;
@@ -143,28 +177,38 @@ namespace tut
 	template <> template <>
 	void test_geom_data_t::object::test<8>()
 	{
-		set_test_name("Fit random points to plane");
+		set_test_name("Fit point cloud to plane");
 
-		unsigned int seed = 0xdeadbeef;
-		std::mt19937 generator(seed);
-		std::uniform_real_distribution<double> dist(-1.0, 1.0);
+		std::ifstream ifs(test_geom_data::test_data_path() + "/buddha-statue_pts.txt");
+		std::vector<vector3d> points;
 
-		const size_t n_pts = 63352;
-
-		std::vector<vector3d> points(n_pts);
-		for (size_t i = 0 ; i < n_pts ; i++)
+		for (std::string line ; std::getline(ifs, line) ; )
 		{
-			double const x = dist(generator);
-			double const y = dist(generator);
-			double const z = dist(generator);
+			double v[3];
+			std::istringstream line_ss(line);
+			for (int i = 0 ; i < 3 ; i++)
+			{
+				std::string tok;
+				std::getline(line_ss, tok, ' ');
+				v[i] = std::strtod(tok.c_str(), nullptr);
+			}
 
-			points[i] = vector3d(x, y, z);
+			points.push_back(vector3d(v[0], v[1], v[2]));
 		}
 
 		vector3d plane_point(5, 5, 5);
 		vector3d plane_normal(0, 0, 0);
 		ensure(primitive_fitting::plane(points.begin(), points.end(), plane_point, plane_normal));
 
+		const double tol = 1.0e-6;	// from input
+		ensure_distance(plane_point.x(), 0.0, tol);
+		ensure_distance(plane_point.y(), 0.0, tol);
+		ensure_distance(plane_point.z(), 0.0, tol);
+
+		// Verified with GNU Octave
+		ensure_distance(plane_normal.x(), -0.155759, tol);
+		ensure_distance(plane_normal.y(),  0.907574, tol);
+		ensure_distance(plane_normal.z(), -0.389935, tol);
 	}
 };
 
