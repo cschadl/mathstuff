@@ -6,7 +6,10 @@
  */
 
 #include "geom.h"
+#include "primitive_fitting.h"
 #include "tut.h"
+
+#include <random>
 
 using namespace maths;
 
@@ -112,4 +115,92 @@ namespace tut
 		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
 		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
 	}
+
+	// This should probably be moved to its own file
+	template <> template <>
+	void test_geom_data_t::object::test<7>()
+	{
+		set_test_name("Primitive fitting: plane");
+
+		// A bunch of planar points on a plane centered at the origin and orthogonal to the Z axis
+		std::vector<vector3d> plane_points;
+		plane_points.push_back(vector3d(1, 0, 0));
+		plane_points.push_back(vector3d(0, 1, 0));
+		plane_points.push_back(vector3d(-1, 0, 0));
+		plane_points.push_back(vector3d(0, -1, 0));
+		plane_points.push_back(vector3d(-0.25, 0.5, 0));
+		plane_points.push_back(vector3d(0.1, -0.7, 0));
+
+		vector3d plane_point(5, 5, 5);
+		vector3d plane_normal(0, 0, 0);
+		bool success = primitive_fitting::plane(plane_points.begin(), plane_points.end(), plane_point, plane_normal);
+		ensure(success);
+
+		ensure(plane_point.is_close(vector3d(-0.1 * 0.25, -0.1 * (1.0 / 3.0), 0), std::numeric_limits<double>::epsilon() * 20));
+		ensure(plane_normal.is_close(vector3d(0, 0, 1), std::numeric_limits<double>::epsilon() * 20));
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<8>()
+	{
+		set_test_name("Fit random points to plane");
+
+		unsigned int seed = 0xdeadbeef;
+		std::mt19937 generator(seed);
+		std::uniform_real_distribution<double> dist(-1.0, 1.0);
+
+		const size_t n_pts = 63352;
+
+		std::vector<vector3d> points(n_pts);
+		for (size_t i = 0 ; i < n_pts ; i++)
+		{
+			double const x = dist(generator);
+			double const y = dist(generator);
+			double const z = dist(generator);
+
+			points[i] = vector3d(x, y, z);
+		}
+
+		vector3d plane_point(5, 5, 5);
+		vector3d plane_normal(0, 0, 0);
+		ensure(primitive_fitting::plane(points.begin(), points.end(), plane_point, plane_normal));
+
+	}
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
