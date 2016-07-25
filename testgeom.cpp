@@ -14,8 +14,6 @@
 #include <libgen.h>
 #include <sys/param.h>
 
-#include <random>
-#include <chrono>
 #include <stdexcept>
 #include <fstream>
 
@@ -179,7 +177,7 @@ namespace tut
 	{
 		set_test_name("Fit point cloud to plane");
 
-		std::ifstream ifs(test_geom_data::test_data_path() + "/buddha-statue_pts.txt");
+		std::ifstream ifs(test_data_path() + "/buddha-statue_pts.txt");
 		std::vector<vector3d> points;
 
 		for (std::string line ; std::getline(ifs, line) ; )
