@@ -210,12 +210,12 @@ namespace tut
 		ensure(A.svd(w, V));
 		//ensure((A * A.get_transpose()).is_close(matrix<double>::I(A.rows()), 1.0e-12));
 		//ensure((V * V.get_transpose()).is_close(matrix<double>::I(A.cols()), 1.0e-12));	// ^^^^
-		std::auto_ptr< const diag_matrix<double> > Im(matrix<double>::diag(A.rows(), 1.0));	// either of these should work
-		std::auto_ptr< const diag_matrix<double> > In(matrix<double>::diag(A.cols(), 1.0));
+		std::unique_ptr< const diag_matrix<double> > Im(matrix<double>::diag(A.rows(), 1.0));	// either of these should work
+		std::unique_ptr< const diag_matrix<double> > In(matrix<double>::diag(A.cols(), 1.0));
 		ensure((A * A.get_transpose()).is_close(*Im, 1.0e-12));
 		ensure((V * V.get_transpose()).is_close(*In, 1.0e-12));
 
-		std::auto_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
+		std::unique_ptr< const diag_matrix<double> > pDw(matrix<double>::diag(w));
 		const diag_matrix<double>& Dw = *pDw;
 
 		matrix<double> R1 = A * Dw * V.get_transpose();
@@ -254,7 +254,7 @@ namespace tut
 
 		//ensure((A * A.get_transpose()).is_close(matrix<float>::I(A.rows()), 1.0e-8));
 		//ensure((V * V.get_transpose()).is_close(matrix<float>::I(A.cols()), 1.0e-8));
-		std::auto_ptr< const diag_matrix<float > > pDw(matrix<float>::diag(w));
+		std::unique_ptr< const diag_matrix<float > > pDw(matrix<float>::diag(w));
 		const diag_matrix<float>& Dw = *pDw;
 
 		matrix<float> R1 = A * Dw * V.get_transpose();

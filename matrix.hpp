@@ -125,7 +125,7 @@ matrix<T>& matrix<T>::transpose()
 	const size_t m_orig_cols = m_n_cols;
 	const_cast<size_t &>(m_n_rows) = m_orig_cols;
 	const_cast<size_t &>(m_n_cols) = m_orig_rows;
-	m_idx = std::auto_ptr<typename matrix<T>::indexer>(m_idx->make_transpose());
+	m_idx = std::unique_ptr<typename matrix<T>::indexer>(m_idx->make_transpose());
 
 	return *this;
 }
@@ -151,7 +151,7 @@ matrix<T> matrix<T>::get_pseudo_inverse() const
 	for (size_t i = 0 ; i < w.size() ; i++)
 		w[i] = w[i] > std::numeric_limits<T>::epsilon() ? T(1) / w[i] : T(0);
 
-	std::auto_ptr< const diag_matrix<T> > pwm(matrix<T>::diag(w));
+	std::unique_ptr< const diag_matrix<T> > pwm(matrix<T>::diag(w));
 	const diag_matrix<T> & wm = *pwm;
 	matrix<T>& Ut = U.transpose();
 
@@ -171,7 +171,7 @@ matrix<T>& matrix<T>::resize(size_t m, size_t n)
 
 	// resizing the matrix re-initializes to row-major
 	// check for 1-based index (kinda icky)
-	std::auto_ptr<indexer> new_indexer;
+	std::unique_ptr<indexer> new_indexer;
 	if (c_begin() > 0)
 	{
 		assert(c_begin() == 1);
@@ -184,7 +184,7 @@ matrix<T>& matrix<T>::resize(size_t m, size_t n)
 		assert(r_begin() == 0);
 		new_indexer.reset(new row_major_indexer(this));
 	}
-	m_idx = new_indexer;
+	m_idx = std::move(new_indexer);
 	m_A = std::valarray<T>((T)0, m * n);
 
 	return *this;
@@ -263,7 +263,7 @@ bool matrix<T>::svd(matrix<T>& a, std::valarray<T>& w, matrix<T>& V)
 	// make sure V is indexed 1..n
 	scoped_index_change Vt_index(&V, V.m_idx->make_one());	
 	matrix<T> rv1(1, n);
-	rv1.m_idx = std::auto_ptr<indexer>(new row_major_1_indexer(&rv1));
+	rv1.m_idx = std::unique_ptr<indexer>(new row_major_1_indexer(&rv1));	// I need make_unique
 
 	size_t i, its, j, jj, k, l, nm;
 	T anorm, c, f, g, h, s, scale, x, y, z;

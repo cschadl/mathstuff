@@ -32,6 +32,8 @@ class invalid_matrix_exception;
 
 template <typename T> class diag_matrix;
 
+/// \remark It was kind of fun to write this, but it's probably best to
+///			just use Eigen instead :(
 template <typename T>
 class matrix
 {
@@ -59,10 +61,10 @@ protected:
 	};
 
 protected:
-	const size_t					m_n_rows;
-	const size_t					m_n_cols;
-	std::valarray<T>				m_A;	// matrix entries
-	mutable std::auto_ptr<indexer>	m_idx;	// should be a unique_ptr.  never NULL.
+	const size_t						m_n_rows;
+	const size_t						m_n_cols;
+	std::valarray<T>					m_A;	// matrix entries
+	mutable std::unique_ptr<indexer>	m_idx;	// should be a unique_ptr
 
 	/** Protected constructor for subclasses (e.g. diag_matrix) */
 	matrix(size_t m, size_t n, const std::valarray<T>& A, indexer* idx);
@@ -282,21 +284,21 @@ protected:
 	class scoped_index_change
 	{
 	protected:
-		const matrix<T> * const mp;
-		std::auto_ptr<indexer>	orig_index;
+		const matrix<T> * const 	mp;
+		std::unique_ptr<indexer>	orig_index;
 
 	public:
 		scoped_index_change(const matrix<T>* m, indexer* new_index)
 		: mp(m)
-		, orig_index(m->m_idx.release())
+		, orig_index(std::move(m->m_idx))
 		{
 			assert(new_index->get_mp() == mp);
-			mp->m_idx = std::auto_ptr<indexer>(new_index);
+			mp->m_idx = std::unique_ptr<indexer>(new_index);
 		}
 
 		~scoped_index_change()
 		{
-			mp->m_idx = std::auto_ptr<indexer>(orig_index.release());
+			mp->m_idx = std::move(orig_index);
 		}
 	};
 };
