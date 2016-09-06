@@ -56,6 +56,8 @@ namespace tut
 			if (bytes < 0)
 				throw std::runtime_error("Couldn't readlink() path");	// shouldn't happen...
 
+			path_buf[bytes] = '\0';
+
 			const std::string cur_path = ::dirname(path_buf);
 
 			char cur_path_buf[MAXPATHLEN];	// because dirname() doesn't take a const char*...
@@ -207,6 +209,88 @@ namespace tut
 		ensure_distance(plane_normal.x(), -0.155759, tol);
 		ensure_distance(plane_normal.y(),  0.907574, tol);
 		ensure_distance(plane_normal.z(), -0.389935, tol);
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<9>()
+	{
+		set_test_name("Best-fit sphere 1");
+
+		auto test_file_path = test_data_path() + "/sphere-points.txt";
+
+		std::ifstream ifs(test_file_path);
+		ensure(!ifs.fail());
+
+		std::vector<vector3d> points;
+		for (std::string line ; std::getline(ifs, line) ; )
+		{
+			double v[3];
+			std::istringstream line_ss(line);
+			for (int i = 0 ; i < 3 ; i++)
+			{
+				std::string tok;
+				std::getline(line_ss, tok, ' ');
+				v[i] = std::strtod(tok.c_str(), nullptr);
+			}
+
+			vector3d p(v[0], v[1], v[2]);
+			vector3d p_t = p + vector3d(5, 4, 3);
+			points.push_back(p_t);
+		}
+
+		ensure(points.size() == 146);
+
+		double const blah = std::numeric_limits<double>::max();
+		vector3d sphere_center(blah, blah, blah);
+		double sphere_radius = blah;
+
+		ensure(primitive_fitting::sphere(points.begin(), points.end(), sphere_center, sphere_radius));
+
+		double tol = 1.0e-6;
+		ensure_distance(sphere_center.x(), 5.0, tol);
+		ensure_distance(sphere_center.y(), 4.0, tol);
+		ensure_distance(sphere_center.z(), 3.0, tol);
+		ensure_distance(sphere_radius, 1.5, tol);
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<10>()
+	{
+		set_test_name("Best-fit sphere 2");
+
+		auto test_file_path = test_data_path() + "/unit_sphere-ascii-points.txt";
+
+		std::ifstream ifs(test_file_path);
+		ensure(!ifs.fail());
+
+		std::vector<vector3d> points;
+		for (std::string line ; std::getline(ifs, line) ; )
+		{
+			double v[3];
+			std::istringstream line_ss(line);
+			for (int i = 0 ; i < 3 ; i++)
+			{
+				std::string tok;
+				std::getline(line_ss, tok, ' ');
+				v[i] = std::strtod(tok.c_str(), nullptr);
+			}
+
+			vector3d p(v[0], v[1], v[2]);
+			points.push_back(p);
+		}
+
+		ensure(points.size() == 2692);
+
+		double const blah = std::numeric_limits<double>::max();
+		vector3d sphere_center(blah, blah, blah);
+		double sphere_radius = blah;
+
+		ensure(primitive_fitting::sphere(points.begin(), points.end(), sphere_center, sphere_radius));
+
+		double const radius_tol = 1.0e-6;
+		double const center_tol_sq = 2.0e-2;	// quite a bit of noise here...
+		ensure(sphere_center.distance_sq(vector3d(0, 0, 0)) < center_tol_sq);
+		ensure_distance(sphere_radius, 1.0, radius_tol);
 	}
 };
 
