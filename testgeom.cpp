@@ -16,8 +16,11 @@
 
 #include <stdexcept>
 #include <fstream>
+#include <random>
+#include <chrono>
 
 using namespace maths;
+using namespace std;
 
 namespace tut
 {
@@ -291,6 +294,49 @@ namespace tut
 		double const center_tol_sq = 2.0e-2;	// quite a bit of noise here...
 		ensure(sphere_center.distance_sq(vector3d(0, 0, 0)) < center_tol_sq);
 		ensure_distance(sphere_radius, 1.0, radius_tol);
+	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<11>()
+	{
+		set_test_name("2d line fit");
+
+		// Define a 2d line from a point (origin) and a direction
+		vector2d const line_pt(0.0, 0.0);
+		vector2d const line_dir(1.0 / ::sqrt(2), 1.0 / ::sqrt(2));
+
+		// Collect a random sample of points on this line, evaluated via
+		// parameters in the interval (-5, 5)
+		//auto line_pt_seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+		size_t line_pt_seed = 0x147574b0584aa4cf;
+		mt19937_64 line_pt_generator(line_pt_seed);	// maybe have separate generators for x and y
+		uniform_real_distribution<double> line_pt_dist(-5.0, 5.0);
+
+		//auto pt_noise_seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+		size_t pt_noise_seed = 0x147574b0584ab42f;
+		mt19937_64 pt_noise_generator(pt_noise_seed);
+		uniform_real_distribution<double> line_noise_dist(-0.025, 0.025);
+
+		const size_t num_pts = 5000;
+		vector<maths::vector2d> line_points(num_pts);
+
+		for (size_t i = 0 ; i < num_pts ; i++)
+		{
+			vector2d pt = line_pt + line_dir * line_pt_dist(line_pt_generator);
+			pt.y() += line_noise_dist(pt_noise_generator);
+
+			line_points.push_back(pt);
+		}
+
+		vector2d best_fit_point, best_fit_dir;
+		ensure(primitive_fitting::line<2>(line_points.begin(), line_points.end(), best_fit_point, best_fit_dir));
+
+		ensure_equals(signbit(best_fit_dir.x()), signbit(best_fit_dir.y()));
+
+		ensure_distance(best_fit_point.x(), 0.0, 1.0e-2);
+		ensure_distance(best_fit_point.y(), 0.0, 1.0e-2);
+		ensure_distance(abs(best_fit_dir.x()), 1.0 / ::sqrt(2), 1.0e-3);
+		ensure_distance(abs(best_fit_dir.y()), 1.0 / ::sqrt(2), 1.0e-3);
 	}
 };
 

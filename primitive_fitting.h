@@ -15,25 +15,26 @@ namespace maths
 
 namespace primitive_fitting
 {
-	template <typename InputIterator, typename PointType>
-	Eigen::JacobiSVD< Eigen::Matrix<typename PointType::value_type, 3, Eigen::Dynamic> >
-	point3svd(InputIterator begin, InputIterator end, const PointType & origin)
+	template <size_t Dim, typename InputIterator, typename PointType>
+	Eigen::JacobiSVD< Eigen::Matrix<typename PointType::value_type, Dim, Eigen::Dynamic> >
+	pointssvd(InputIterator begin, InputIterator end, const PointType & origin)
 	{
 		static_assert(std::is_same<typename std::decay<decltype(*begin)>::type, PointType>::value, "Type mismatch");
 
-		typedef typename PointType::value_type value_type;
-		typedef Eigen::Matrix<value_type, 3, Eigen::Dynamic> MatrixType;
+		typedef typename PointType::value_type scalar;
+		typedef Eigen::Matrix<scalar, Dim, Eigen::Dynamic> MatrixType;
 
 		const size_t n = std::distance(begin, end);
 
-		MatrixType A(3, n);
+		MatrixType A(Dim, n);
 		for (size_t i = 0 ; i < n ; i++)
 		{
-			PointType p_i = (*(begin + i)) - origin;
+			PointType p_i = (*std::next(begin, i)) - origin;
 
-			A(0, i) = p_i.x();
-			A(1, i) = p_i.y();
-			A(2, i) = p_i.z();
+			for (size_t j = 0 ; j < Dim ; j++)
+			{
+				A(j, i) = p_i[j];
+			}
 		}
 
 		Eigen::JacobiSVD<MatrixType> svd(A, Eigen::ComputeThinU);
@@ -53,7 +54,7 @@ namespace primitive_fitting
 			return false;
 
 		PointType origin = centroid(begin, end);
-		auto svd = point3svd(begin, end, origin);
+		auto svd = pointssvd<3>(begin, end, origin);
 
 		auto u2 = svd.matrixU().col(2);
 
@@ -66,10 +67,9 @@ namespace primitive_fitting
 		return true;
 	}
 
-	/** Best fit line through a 3d point cloud.
-	 *  TODO - template this to work with 2d as well.
+	/** Best fit line through a point cloud.
 	 */
-	template <typename InputIterator, typename PointType>
+	template <size_t Dim, typename InputIterator, typename PointType>
 	bool line(	InputIterator begin, InputIterator end,
 				PointType & out_point,
 				PointType & out_dir	)
@@ -79,15 +79,14 @@ namespace primitive_fitting
 			return false;
 
 		PointType origin = centroid(begin, end);
-		auto svd = point3svd(begin, end, origin);
+		auto svd = pointssvd<Dim>(begin, end, origin);
 
 		auto u0 = svd.matrixU().col(0);
 
 		out_point = origin;
 
-		out_dir.x() = u0(0);
-		out_dir.y() = u0(1);
-		out_dir.z() = u0(2);
+		for (size_t j = 0 ; j < Dim ; j++)
+			out_dir[j] = u0(j);
 
 		return true;
 	}
@@ -101,25 +100,25 @@ namespace primitive_fitting
 				PointType & out_sphere_center,
 				typename PointType::value_type & out_sphere_radius)
 	{
-		typedef typename PointType::value_type value_type;
-		typedef Eigen::Matrix<value_type, 4, 4>	Matrix_t;
-		typedef Eigen::Matrix<value_type, 4, 1> Vector_t;
+		typedef typename PointType::value_type scalar;
+		typedef Eigen::Matrix<scalar, 4, 4>	Matrix_t;
+		typedef Eigen::Matrix<scalar, 4, 1> Vector_t;
 
-		auto const n = (value_type) std::distance(begin, end);
+		auto const n = (scalar) std::distance(begin, end);
 
-		value_type sum_x = value_type(0);
-		value_type sum_y = value_type(0);
-		value_type sum_z = value_type(0);
-		value_type sum_xy = value_type(0);
-		value_type sum_xz = value_type(0);
-		value_type sum_yz = value_type(0);
-		value_type sum_rho_sq = value_type(0);
-		value_type sum_rho_sq_x = value_type(0);
-		value_type sum_rho_sq_y	= value_type(0);
-		value_type sum_rho_sq_z = value_type(0);
-		value_type sum_x_sq = value_type(0);
-		value_type sum_y_sq = value_type(0);
-		value_type sum_z_sq = value_type(0);
+		scalar sum_x = scalar(0);
+		scalar sum_y = scalar(0);
+		scalar sum_z = scalar(0);
+		scalar sum_xy = scalar(0);
+		scalar sum_xz = scalar(0);
+		scalar sum_yz = scalar(0);
+		scalar sum_rho_sq = scalar(0);
+		scalar sum_rho_sq_x = scalar(0);
+		scalar sum_rho_sq_y	= scalar(0);
+		scalar sum_rho_sq_z = scalar(0);
+		scalar sum_x_sq = scalar(0);
+		scalar sum_y_sq = scalar(0);
+		scalar sum_z_sq = scalar(0);
 
 		for (auto it = begin ; it != end ; ++it)
 		{
@@ -133,7 +132,7 @@ namespace primitive_fitting
 			sum_xz += p.x() * p.z();
 			sum_yz += p.y() * p.z();
 
-			value_type rho_sq = (p.x() * p.x()) + (p.y() * p.y()) + (p.z() * p.z());
+			scalar rho_sq = (p.x() * p.x()) + (p.y() * p.y()) + (p.z() * p.z());
 			sum_rho_sq += rho_sq;
 			sum_rho_sq_x += rho_sq * p.x();
 			sum_rho_sq_y += rho_sq * p.y();
@@ -159,13 +158,13 @@ namespace primitive_fitting
 		Eigen::HouseholderQR<Matrix_t> M_qr(M);
 		Vector_t A = M_qr.solve(q);
 
-		value_type const a = 0.5 * A[1];
-		value_type const b = 0.5 * A[2];
-		value_type const c = 0.5 * A[3];
+		scalar const a = 0.5 * A[1];
+		scalar const b = 0.5 * A[2];
+		scalar const c = 0.5 * A[3];
 
-		value_type const abc_sq = (a * a) + (b * b) + (c *  c);
+		scalar const abc_sq = (a * a) + (b * b) + (c *  c);
 
-		value_type const r = ::sqrt(abc_sq + A[0]);
+		scalar const r = ::sqrt(abc_sq + A[0]);	// sources say this is sqrt(abc_sq - A[0]), but that's wrong...
 
 		out_sphere_center.x() = a;
 		out_sphere_center.y() = b;
