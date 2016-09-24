@@ -18,6 +18,7 @@
 #include <fstream>
 #include <random>
 #include <chrono>
+#include <iomanip>	// for std::setprecision
 
 using namespace maths;
 using namespace std;
@@ -337,6 +338,21 @@ namespace tut
 		ensure_distance(line2d.point().y(), 0.0, 1.0e-2);
 		ensure_distance(abs(line2d.dir().x()), 1.0 / ::sqrt(2), 1.0e-3);
 		ensure_distance(abs(line2d.dir().y()), 1.0 / ::sqrt(2), 1.0e-3);
+
+		double rmsd = accumulate(line_points.begin(), line_points.end(), 0.0,
+			[&line2d](double err_sq, const maths::vector2d & p)
+			{
+				const double dist = line2d.distance(p);
+				err_sq += dist * dist;
+
+				return err_sq;
+			});
+
+		rmsd /= (double) line_points.size();
+
+		// What's the average expected value of a uniform distribution [-0.025, 0.025] with n = 5000?
+		// Oh well, let's just give it a magic number for now.
+		ensure(rmsd < 1.0e-4);
 	}
 };
 
