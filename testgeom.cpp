@@ -328,15 +328,15 @@ namespace tut
 			line_points.push_back(pt);
 		}
 
-		vector2d best_fit_point, best_fit_dir;
-		ensure(primitive_fitting::line<2>(line_points.begin(), line_points.end(), best_fit_point, best_fit_dir));
+		maths::line<double, 2> line2d;
+		ensure(primitive_fitting::line<2>(line_points.begin(), line_points.end(), line2d));
 
-		ensure_equals(signbit(best_fit_dir.x()), signbit(best_fit_dir.y()));
+		ensure_equals(signbit(line2d.dir().x()), signbit(line2d.dir().y()));
 
-		ensure_distance(best_fit_point.x(), 0.0, 1.0e-2);
-		ensure_distance(best_fit_point.y(), 0.0, 1.0e-2);
-		ensure_distance(abs(best_fit_dir.x()), 1.0 / ::sqrt(2), 1.0e-3);
-		ensure_distance(abs(best_fit_dir.y()), 1.0 / ::sqrt(2), 1.0e-3);
+		ensure_distance(line2d.point().x(), 0.0, 1.0e-2);
+		ensure_distance(line2d.point().y(), 0.0, 1.0e-2);
+		ensure_distance(abs(line2d.dir().x()), 1.0 / ::sqrt(2), 1.0e-3);
+		ensure_distance(abs(line2d.dir().y()), 1.0 / ::sqrt(2), 1.0e-3);
 	}
 };
 

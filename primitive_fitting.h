@@ -69,24 +69,36 @@ namespace primitive_fitting
 
 	/** Best fit line through a point cloud.
 	 */
-	template <size_t Dim, typename InputIterator, typename PointType>
-	bool line(	InputIterator begin, InputIterator end,
-				PointType & out_point,
-				PointType & out_dir	)
+	template <size_t Dim, typename InputIterator, typename LineType>
+	bool line(InputIterator begin, InputIterator end, LineType & out_line)
 	{
+		static_assert(maths::traits::halfspace_traits<LineType>::dimension() == Dim, "Dimension mismatch");
+
+		typedef typename LineType::point_type PointType;
+		typedef typename LineType::vector_type VectorType;
+
 		const size_t n = std::distance(begin, end);
 		if (n < 2)
 			return false;
+
+		if (n == 2)
+		{
+			// shoot
+			//geom_adapters::line<LineType>::create(begin, next(begin));
+		}
 
 		PointType origin = centroid(begin, end);
 		auto svd = pointssvd<Dim>(begin, end, origin);
 
 		auto u0 = svd.matrixU().col(0);
 
-		out_point = origin;
+		VectorType dir;
 
 		for (size_t j = 0 ; j < Dim ; j++)
-			out_dir[j] = u0(j);
+			dir[j] = u0(j);
+
+		out_line.point() = origin;
+		out_line.dir() = dir;
 
 		return true;
 	}

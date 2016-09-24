@@ -30,7 +30,7 @@ protected:
 	std::valarray<T> m_v;	// vector elements
 
 public:
-	enum { Dim = N };
+	static const size_t Dim = N;
 	typedef T value_type;
 
 public:
@@ -43,7 +43,7 @@ public:
 	~n_vector() { }
 
 	/** The number of elements in the vector **/
-	int size() const { return Dim; }
+	size_t size() const { return Dim; }
 
 	T length() const;								/** length **/
 	T length_sq() const;							/** length squared (faster, but less percise than length() (?) **/
@@ -160,7 +160,7 @@ n_vector<T, N>::n_vector(T a, T b, T c, T d)
 template <typename T, int N>
 bool n_vector<T, N>::operator==(const n_vector<T, N>& rhs) const
 {
-	for (int i = 0 ; i < Dim ; i++)
+	for (size_t i = 0 ; i < Dim ; i++)
 		if (m_v[i] != rhs.m_v[i])
 			return false;
 
@@ -224,7 +224,7 @@ T n_vector<T, N>::norm(unsigned int p) const
 	// TODO - p must not be 0
 
 	T p_norm = (T)0;
-	for (int i = 0 ; i < Dim ; i++)
+	for (size_t i = 0 ; i < Dim ; i++)
 		p_norm += fabs(pow(m_v[i], (T) p));
 
 	p_norm = pow(p_norm, (T)1 / (T) p);

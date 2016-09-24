@@ -250,6 +250,41 @@ public:
 	T signed_volume() const;
 };
 
+template <class T, int Dim>
+class line
+{
+private:
+	n_vector<T, Dim>	m_point;
+	n_vector<T, Dim>	m_dir;
+
+public:
+	typedef n_vector<T, Dim> point_type;
+	typedef n_vector<T, Dim> vector_type;
+
+	line() = default;
+
+	line(const point_type& point, const vector_type& dir);
+
+	/// Constructs a line from a pair of points
+	line(const std::pair< point_type, vector_type > & points);
+
+	/// Gets the point on the line paramaterized by t
+	point_type evaluate(T t) const;
+
+	const point_type& point() const { return m_point; }
+		  point_type& point()		{ return m_point; }
+
+	const vector_type& dir() const	{ return m_dir; }
+		  vector_type& dir()		{ return m_dir; }
+
+	bool is_degenerate() const { return m_dir == vector_type(0, 0, 0); }
+
+	/// Get the distance from the line to the point p
+	T distance(const point_type& p) const;
+
+	// orthogonal and whatnot are adapters?
+};
+
 typedef triangle_3<double> triangle3d;
 typedef triangle_3<float>  triangle3f;
 
@@ -368,6 +403,40 @@ T triangle_3<T>::area() const
 	return maths::cross(a, b).norm(2) / T(2);
 }
 
+template <typename T, int Dim>
+line<T, Dim>::line(const n_vector<T, Dim>& point, const n_vector<T, Dim>& dir)
+: m_point(point)
+, m_dir(dir)
+{
+
+}
+
+template <typename T, int Dim>
+line<T, Dim>::line(const std::pair< n_vector<T, Dim>, n_vector<T, Dim> >& points)
+: m_point(points.first)
+, m_dir((points.second - points.first).unit())
+{
+
+}
+
+template <typename T, int Dim>
+n_vector<T, Dim> line<T, Dim>::evaluate(T t) const
+{
+	return m_point + m_dir * t;
+}
+
+template <typename T, int Dim>
+T line<T, Dim>::distance(const n_vector<T, Dim>& p) const
+{
+	// distance = ||(o - p) - ((o - p) * n) * n||
+	// How numerically stable is this?  What if
+	// p is close to the line, but far away from m_point?
+
+	auto op = m_point - p;
+	return (op - (op * m_dir) * m_dir).length();
+}
+
+
 // Compute the centroid of some group of things
 template <typename InputIterator>
 auto centroid(InputIterator begin, InputIterator end) -> typename std::decay<decltype(*begin)>::type
@@ -398,6 +467,38 @@ auto centroid(InputIterator begin, InputIterator end, Func f) -> typename std::d
 
 	return out;
 }
+
+namespace traits
+{
+
+/// Can be specialized for PointType without value_type or Dim
+template <typename PointType>
+struct point_traits
+{
+	typedef typename PointType::value_type	value_type;
+	static constexpr size_t dimension() { return PointType::Dim; }
+};
+
+/// Line or plane
+/// I guess a line isn't necessarily a halfspace...
+template <typename LineType>
+struct halfspace_traits
+{
+	typedef typename LineType::point_type					point_type;
+	typedef typename LineType::vector_type					vector_type;
+	typedef typename point_traits<point_type>::value_type	value_type;
+
+	static constexpr size_t dimension() { return point_traits<point_type>::dimension(); }
+};
+
+};	// namespace traits
+
+namespace adapters
+{
+//	must be variadic for dim
+//	template <typename PointType>
+//	PointType create_point()
+};
 
 };
 
