@@ -40,6 +40,13 @@ public:
 	n_vector(T a, T b, T c, T d);	// 4-vector
 	n_vector(const std::valarray<T>& va) : m_v(va) { assert(m_v.size() == N); }
 	n_vector(const T* data, size_t n) : m_v(data, n) { }
+
+	n_vector(const n_vector<T, N>&) = default;
+	n_vector<T, N>& operator=(const n_vector<T, N>&) = default;
+
+	n_vector(n_vector<T, N>&&) = default;
+	n_vector<T, N>& operator=(n_vector<T, N>&&) = default;
+
 	~n_vector() { }
 
 	/** The number of elements in the vector **/

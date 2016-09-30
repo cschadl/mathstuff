@@ -860,7 +860,7 @@ template <typename T>
 matrix<T> matrix<T>::rotation(const vector3f& axis, T angle_deg)
 {
 	// Make sure axis is a unit vector
-	const vector3f& uvw = axis.is_unit() ? axis : axis.make_unit();
+	const vector3f uvw = axis.is_unit() ? axis : axis.make_unit();
 	const T t = maths::deg_to_rad(angle_deg);
 
 	const T& u = uvw.x();	// save some typing...

@@ -2,6 +2,7 @@
 #define GEOM_H
 
 #include <type_traits>
+#include <utility>
 
 #include "vectors.h"
 #include "misc.h"
@@ -495,9 +496,42 @@ struct halfspace_traits
 
 namespace adapters
 {
-//	must be variadic for dim
-//	template <typename PointType>
-//	PointType create_point()
+
+template <typename PointType>
+struct create_point
+{
+	template <typename ... Args>
+	PointType operator()(Args && ... args)
+	{
+		static_assert(
+				sizeof...(args) == traits::point_traits<PointType>::dimension(),
+				"Point dimension mismatch");
+
+		return PointType(std::forward<Args>(args)...);
+	}
+};
+
+template <typename LineType, size_t Dim>
+struct create_line
+{
+	typedef typename traits::halfspace_traits<LineType>::point_type point_type;
+
+	static LineType from_points(point_type&& p1, point_type&& p2)
+	{
+		return LineType(std::make_pair(p1, p2));
+	}
+
+	static LineType from_points(const point_type& p1, const point_type& p2)
+	{
+		return LineType(std::make_pair(p1, p2));
+	}
+
+	static LineType from_point_dir(point_type&& point, point_type&& dir)
+	{
+		return LineType(std::forward<point_type>(point), std::forward<point_type>(dir));
+	}
+};
+
 };
 
 };

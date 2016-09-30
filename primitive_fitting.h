@@ -3,6 +3,8 @@
 
 #include <type_traits>
 #include <numeric>
+#include <iterator>
+#include <utility>
 
 #include <Eigen/QR>
 #include <Eigen/SVD>
@@ -83,8 +85,9 @@ namespace primitive_fitting
 
 		if (n == 2)
 		{
-			// shoot
-			//geom_adapters::line<LineType>::create(begin, next(begin));
+			out_line = maths::adapters::create_line<LineType, Dim>::from_points(*begin, *std::next(begin));
+
+			return true;
 		}
 
 		PointType origin = centroid(begin, end);
@@ -97,8 +100,7 @@ namespace primitive_fitting
 		for (size_t j = 0 ; j < Dim ; j++)
 			dir[j] = u0(j);
 
-		out_line.point() = origin;
-		out_line.dir() = dir;
+		out_line = maths::adapters::create_line<LineType, Dim>::from_point_dir(std::move(origin), std::move(dir));
 
 		return true;
 	}

@@ -354,6 +354,25 @@ namespace tut
 		// Oh well, let's just give it a magic number for now.
 		ensure(rmsd < 1.0e-4);
 	}
+
+	template <> template <>
+	void test_geom_data_t::object::test<12>()
+	{
+		set_test_name("maths::adapters::create_point");
+
+		maths::adapters::create_point<maths::vector2d> point2d_factory;
+		maths::adapters::create_point<maths::vector3d> point3d_factory;
+
+		auto point2d = point2d_factory(0.0, 1.0);
+		auto point3d = point3d_factory(1.0, 2.0, 3.0);
+
+		ensure(point2d.x() == 0.0);
+		ensure(point2d.y() == 1.0);
+
+		ensure(point3d.x() == 1.0);
+		ensure(point3d.y() == 2.0);
+		ensure(point3d.z() == 3.0);
+	}
 };
 
 
