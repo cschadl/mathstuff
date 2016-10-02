@@ -76,8 +76,10 @@ namespace primitive_fitting
 	{
 		static_assert(maths::traits::halfspace_traits<LineType>::dimension() == Dim, "Dimension mismatch");
 
-		typedef typename LineType::point_type PointType;
-		typedef typename LineType::vector_type VectorType;
+		typedef typename maths::traits::halfspace_traits<LineType>::point_type point_type;
+		typedef typename maths::traits::halfspace_traits<LineType>::vector_type vector_type;
+
+		using create_line = maths::adapters::create_line<LineType, Dim>;
 
 		const size_t n = std::distance(begin, end);
 		if (n < 2)
@@ -85,22 +87,22 @@ namespace primitive_fitting
 
 		if (n == 2)
 		{
-			out_line = maths::adapters::create_line<LineType, Dim>::from_points(*begin, *std::next(begin));
+			out_line = create_line::from_points(*begin, *std::next(begin));
 
 			return true;
 		}
 
-		PointType origin = centroid(begin, end);
+		point_type origin = centroid(begin, end);
 		auto svd = pointssvd<Dim>(begin, end, origin);
 
 		auto u0 = svd.matrixU().col(0);
 
-		VectorType dir;
+		vector_type dir;
 
 		for (size_t j = 0 ; j < Dim ; j++)
 			dir[j] = u0(j);
 
-		out_line = maths::adapters::create_line<LineType, Dim>::from_point_dir(std::move(origin), std::move(dir));
+		out_line = create_line::from_point_dir(std::move(origin), std::move(dir));
 
 		return true;
 	}
