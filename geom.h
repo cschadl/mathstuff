@@ -437,7 +437,6 @@ T line<T, Dim>::distance(const n_vector<T, Dim>& p) const
 	return (op - (op * m_dir) * m_dir).length();
 }
 
-
 // Compute the centroid of some group of things
 template <typename InputIterator>
 auto centroid(InputIterator begin, InputIterator end) -> typename std::decay<decltype(*begin)>::type
@@ -477,11 +476,23 @@ template <typename PointType>
 struct point_traits
 {
 	typedef typename PointType::value_type	value_type;
+
 	static constexpr size_t dimension() { return PointType::Dim; }
+
+	template <typename P = PointType>
+	static typename std::enable_if<P::Dim == 3, P>::type origin()
+	{
+		return PointType(value_type(0), value_type(0), value_type(0));
+	}
+
+	template <typename P = PointType>
+	static typename std::enable_if<P::Dim == 2, P>::type origin()
+	{
+		return PointType(value_type(0), value_type(0));
+	}
 };
 
 /// Line or plane
-/// I guess a line isn't necessarily a halfspace...
 template <typename LineType>
 struct halfspace_traits
 {

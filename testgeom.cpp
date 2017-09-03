@@ -18,7 +18,7 @@
 #include <fstream>
 #include <random>
 #include <chrono>
-#include <iomanip>	// for std::setprecision
+#include <iomanip>	// for setprecision
 
 using namespace maths;
 using namespace std;
@@ -47,7 +47,21 @@ namespace tut
 			const vector2d& p() const { return point; }
 		};
 
-		static std::string test_data_path()
+		class stupid_2d_vector : public maths::vector2d
+		{
+		public:
+			stupid_2d_vector() : maths::vector2d(numeric_limits<double>::max(), numeric_limits<double>::max()) { }
+			stupid_2d_vector(double x, double y) : maths::vector2d(x, y) { }
+		};
+
+		class stupid_3d_vector : public maths::vector3d
+		{
+		public:
+			stupid_3d_vector() : maths::vector3d(numeric_limits<double>::max(), numeric_limits<double>::max(), numeric_limits<double>::max()) { }
+			stupid_3d_vector(double x, double y, double z) : maths::vector3d(x, y, z) { }
+		};
+
+		static string test_data_path()
 		{
 			// Get path of TUT test data.
 			// We'll assume that it's one directory up in test_data/
@@ -58,19 +72,19 @@ namespace tut
 			::sprintf(tmp, "/proc/%d/exe", ::getpid());
 			const int bytes = std::min(::readlink(tmp, path_buf, MAXPATHLEN), (ssize_t)(MAXPATHLEN - 1));
 			if (bytes < 0)
-				throw std::runtime_error("Couldn't readlink() path");	// shouldn't happen...
+				throw runtime_error("Couldn't readlink() path");	// shouldn't happen...
 
 			path_buf[bytes] = '\0';
 
-			const std::string cur_path = ::dirname(path_buf);
+			const string cur_path = ::dirname(path_buf);
 
 			char cur_path_buf[MAXPATHLEN];	// because dirname() doesn't take a const char*...
-			std::size_t cur_path_len = cur_path.copy(cur_path_buf, cur_path.length());
+			size_t cur_path_len = cur_path.copy(cur_path_buf, cur_path.length());
 			cur_path_buf[cur_path_len] = '\0';
 
-			const std::string base_path = ::dirname(cur_path_buf);
+			const string base_path = ::dirname(cur_path_buf);
 
-			std::string path = base_path + "/test_data";
+			string path = base_path + "/test_data";
 
 			return path;
 		}
@@ -84,7 +98,7 @@ namespace tut
 	{
 		set_test_name("determine normal");
 		triangle3d t(y, -x, x);	// CCW orientation
-		ensure(t.normal().is_close(z, std::numeric_limits<double>::epsilon()));
+		ensure(t.normal().is_close(z, numeric_limits<double>::epsilon()));
 	}
 
 	template <> template <>
@@ -92,8 +106,8 @@ namespace tut
 	{
 		set_test_name("flip normal");
 		triangle3d t(y, x, -x);	// CW orientation
-		ensure(t.normal().is_close(-z, std::numeric_limits<double>::epsilon()));
-		ensure(t.flipped().normal().is_close(z, std::numeric_limits<double>::epsilon()));
+		ensure(t.normal().is_close(-z, numeric_limits<double>::epsilon()));
+		ensure(t.flipped().normal().is_close(z, numeric_limits<double>::epsilon()));
 	}
 
 	template <> template <>
@@ -101,7 +115,7 @@ namespace tut
 	{
 		set_test_name("is_degenerate()");
 
-		triangle3d dg(y, vector3d(-std::numeric_limits<double>::min() * 10.0, 0.0, 0.0), vector3d(0.0, 0.0, 0.0));
+		triangle3d dg(y, vector3d(-numeric_limits<double>::min() * 10.0, 0.0, 0.0), vector3d(0.0, 0.0, 0.0));
 		ensure(dg.is_degenerate());
 
 		triangle3d t(y, -x, x);
@@ -115,9 +129,9 @@ namespace tut
 
 		triangle3d t(z, (-y - x), (-y + x));
 		const bbox_3<double> bbox = t.bbox();
-		ensure(maths::close(bbox.extent_x(), 2.0, std::numeric_limits<double>::epsilon()));
-		ensure(maths::close(bbox.extent_y(), 1.0, std::numeric_limits<double>::epsilon()));
-		ensure(maths::close(bbox.extent_z(), 1.0, std::numeric_limits<double>::epsilon()));
+		ensure(maths::close(bbox.extent_x(), 2.0, numeric_limits<double>::epsilon()));
+		ensure(maths::close(bbox.extent_y(), 1.0, numeric_limits<double>::epsilon()));
+		ensure(maths::close(bbox.extent_z(), 1.0, numeric_limits<double>::epsilon()));
 	}
 
 	template <> template <>
@@ -125,15 +139,15 @@ namespace tut
 	{
 		set_test_name("Centroid");
 
-		std::vector<vector2d> square;
+		vector<vector2d> square;
 		square.push_back(vector2d(-1, -1));
 		square.push_back(vector2d(1, -1));
 		square.push_back(vector2d(1, 1));
 		square.push_back(vector2d(-1, 1));
 
 		vector2d c = centroid(square.begin(), square.end());
-		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
-		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
+		ensure(close(c.x(), 0.0, numeric_limits<double>::epsilon()));
+		ensure(close(c.y(), 0.0, numeric_limits<double>::epsilon()));
 	}
 
 	template <> template <>
@@ -141,7 +155,7 @@ namespace tut
 	{
 		set_test_name("Centroid functor");
 
-		std::vector<test_geom_data::point_wrapper> points;
+		vector<test_geom_data::point_wrapper> points;
 		points.push_back(test_geom_data::point_wrapper(-1, -1));
 		points.push_back(test_geom_data::point_wrapper(1, -1));
 		points.push_back(test_geom_data::point_wrapper(1, 1));
@@ -150,8 +164,8 @@ namespace tut
 		vector2d c = centroid(points.begin(), points.end(),
 			[](const test_geom_data::point_wrapper & pw) { return pw.p(); });
 
-		ensure(close(c.x(), 0.0, std::numeric_limits<double>::epsilon()));
-		ensure(close(c.y(), 0.0, std::numeric_limits<double>::epsilon()));
+		ensure(close(c.x(), 0.0, numeric_limits<double>::epsilon()));
+		ensure(close(c.y(), 0.0, numeric_limits<double>::epsilon()));
 	}
 
 	// This should probably be moved to its own file
@@ -161,7 +175,7 @@ namespace tut
 		set_test_name("Primitive fitting: plane");
 
 		// A bunch of planar points on a plane centered at the origin and orthogonal to the Z axis
-		std::vector<vector3d> plane_points;
+		vector<vector3d> plane_points;
 		plane_points.push_back(vector3d(1, 0, 0));
 		plane_points.push_back(vector3d(0, 1, 0));
 		plane_points.push_back(vector3d(-1, 0, 0));
@@ -174,8 +188,8 @@ namespace tut
 		bool success = primitive_fitting::plane(plane_points.begin(), plane_points.end(), plane_point, plane_normal);
 		ensure(success);
 
-		ensure(plane_point.is_close(vector3d(-0.1 * 0.25, -0.1 * (1.0 / 3.0), 0), std::numeric_limits<double>::epsilon() * 20));
-		ensure(plane_normal.is_close(vector3d(0, 0, 1), std::numeric_limits<double>::epsilon() * 20));
+		ensure(plane_point.is_close(vector3d(-0.1 * 0.25, -0.1 * (1.0 / 3.0), 0), numeric_limits<double>::epsilon() * 20));
+		ensure(plane_normal.is_close(vector3d(0, 0, 1), numeric_limits<double>::epsilon() * 20));
 	}
 
 	template <> template <>
@@ -183,18 +197,18 @@ namespace tut
 	{
 		set_test_name("Fit point cloud to plane");
 
-		std::ifstream ifs(test_data_path() + "/buddha-statue_pts.txt");
-		std::vector<vector3d> points;
+		ifstream ifs(test_data_path() + "/buddha-statue_pts.txt");
+		vector<vector3d> points;
 
-		for (std::string line ; std::getline(ifs, line) ; )
+		for (string line ; getline(ifs, line) ; )
 		{
 			double v[3];
-			std::istringstream line_ss(line);
+			istringstream line_ss(line);
 			for (int i = 0 ; i < 3 ; i++)
 			{
-				std::string tok;
-				std::getline(line_ss, tok, ' ');
-				v[i] = std::strtod(tok.c_str(), nullptr);
+				string tok;
+				getline(line_ss, tok, ' ');
+				v[i] = strtod(tok.c_str(), nullptr);
 			}
 
 			points.push_back(vector3d(v[0], v[1], v[2]));
@@ -222,19 +236,19 @@ namespace tut
 
 		auto test_file_path = test_data_path() + "/sphere-points.txt";
 
-		std::ifstream ifs(test_file_path);
+		ifstream ifs(test_file_path);
 		ensure(!ifs.fail());
 
-		std::vector<vector3d> points;
-		for (std::string line ; std::getline(ifs, line) ; )
+		vector<vector3d> points;
+		for (string line ; getline(ifs, line) ; )
 		{
 			double v[3];
-			std::istringstream line_ss(line);
+			istringstream line_ss(line);
 			for (int i = 0 ; i < 3 ; i++)
 			{
-				std::string tok;
-				std::getline(line_ss, tok, ' ');
-				v[i] = std::strtod(tok.c_str(), nullptr);
+				string tok;
+				getline(line_ss, tok, ' ');
+				v[i] = strtod(tok.c_str(), nullptr);
 			}
 
 			vector3d p(v[0], v[1], v[2]);
@@ -244,7 +258,7 @@ namespace tut
 
 		ensure(points.size() == 146);
 
-		double const blah = std::numeric_limits<double>::max();
+		double const blah = numeric_limits<double>::max();
 		vector3d sphere_center(blah, blah, blah);
 		double sphere_radius = blah;
 
@@ -264,19 +278,19 @@ namespace tut
 
 		auto test_file_path = test_data_path() + "/unit_sphere-ascii-points.txt";
 
-		std::ifstream ifs(test_file_path);
+		ifstream ifs(test_file_path);
 		ensure(!ifs.fail());
 
-		std::vector<vector3d> points;
-		for (std::string line ; std::getline(ifs, line) ; )
+		vector<vector3d> points;
+		for (string line ; getline(ifs, line) ; )
 		{
 			double v[3];
-			std::istringstream line_ss(line);
+			istringstream line_ss(line);
 			for (int i = 0 ; i < 3 ; i++)
 			{
-				std::string tok;
-				std::getline(line_ss, tok, ' ');
-				v[i] = std::strtod(tok.c_str(), nullptr);
+				string tok;
+				getline(line_ss, tok, ' ');
+				v[i] = strtod(tok.c_str(), nullptr);
 			}
 
 			vector3d p(v[0], v[1], v[2]);
@@ -285,7 +299,7 @@ namespace tut
 
 		ensure(points.size() == 2692);
 
-		double const blah = std::numeric_limits<double>::max();
+		double const blah = numeric_limits<double>::max();
 		vector3d sphere_center(blah, blah, blah);
 		double sphere_radius = blah;
 
@@ -372,6 +386,21 @@ namespace tut
 		ensure(point3d.x() == 1.0);
 		ensure(point3d.y() == 2.0);
 		ensure(point3d.z() == 3.0);
+	}
+
+	template<> template<>
+	void test_geom_data_t::object::test<13>()
+	{
+		set_test_name("maths::traits::point_traits<T>::null()");
+
+		auto v3d = maths::traits::point_traits<stupid_3d_vector>::origin();
+		ensure(v3d.x() == 0.0);
+		ensure(v3d.y() == 0.0);
+		ensure(v3d.z() == 0.0);
+
+		auto v2d = maths::traits::point_traits<stupid_2d_vector>::origin();
+		ensure(v2d.x() == 0.0);
+		ensure(v2d.y() == 0.0);
 	}
 };
 
