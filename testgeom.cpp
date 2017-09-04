@@ -19,6 +19,7 @@
 #include <random>
 #include <chrono>
 #include <iomanip>	// for setprecision
+#include <list>
 
 using namespace maths;
 using namespace std;
@@ -198,7 +199,10 @@ namespace tut
 		set_test_name("Fit point cloud to plane");
 
 		ifstream ifs(test_data_path() + "/buddha-statue_pts.txt");
-		vector<vector3d> points;
+
+		// Use a std::list to make sure that primitive_fitting::plane
+		// works with non random-access iterators.
+		list<vector3d> points;
 
 		for (string line ; getline(ifs, line) ; )
 		{
@@ -391,7 +395,7 @@ namespace tut
 	template<> template<>
 	void test_geom_data_t::object::test<13>()
 	{
-		set_test_name("maths::traits::point_traits<T>::null()");
+		set_test_name("maths::traits::point_traits<T>::origin()");
 
 		auto v3d = maths::traits::point_traits<stupid_3d_vector>::origin();
 		ensure(v3d.x() == 0.0);

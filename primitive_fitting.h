@@ -29,14 +29,18 @@ namespace primitive_fitting
 		const size_t n = std::distance(begin, end);
 
 		MatrixType A(Dim, n);
+
+		auto it = begin;
 		for (size_t i = 0 ; i < n ; i++)
 		{
-			PointType p_i = (*std::next(begin, i)) - origin;
+			PointType p_i = *it - origin;
 
 			for (size_t j = 0 ; j < Dim ; j++)
 			{
 				A(j, i) = p_i[j];
 			}
+
+			++it;
 		}
 
 		Eigen::JacobiSVD<MatrixType> svd(A, Eigen::ComputeThinU);
