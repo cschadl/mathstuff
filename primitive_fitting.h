@@ -62,6 +62,9 @@ namespace primitive_fitting
 		PointType origin = centroid(begin, end);
 		auto svd = pointssvd<3>(begin, end, origin);
 
+		if (svd.rank() < 2)
+			return false;
+
 		auto u2 = svd.matrixU().col(2);
 
 		out_point = origin;
@@ -75,13 +78,13 @@ namespace primitive_fitting
 
 	/** Best fit line through a point cloud.
 	 */
-	template <size_t Dim, typename InputIterator, typename LineType>
+	template <typename InputIterator, typename LineType>
 	bool line(InputIterator begin, InputIterator end, LineType & out_line)
 	{
-		static_assert(maths::traits::halfspace_traits<LineType>::dimension() == Dim, "Dimension mismatch");
-
 		typedef typename maths::traits::halfspace_traits<LineType>::point_type point_type;
 		typedef typename maths::traits::halfspace_traits<LineType>::vector_type vector_type;
+
+		constexpr size_t Dim = maths::traits::halfspace_traits<LineType>::dimension();
 
 		using create_line = maths::adapters::create_line<LineType, Dim>;
 
