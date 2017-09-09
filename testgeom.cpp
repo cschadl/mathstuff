@@ -348,7 +348,7 @@ namespace tut
 		}
 
 		maths::line<double, 2> line2d;
-		ensure(primitive_fitting::line<2>(line_points.begin(), line_points.end(), line2d));
+		ensure(primitive_fitting::line(line_points.begin(), line_points.end(), line2d));
 
 		ensure_equals(signbit(line2d.dir().x()), signbit(line2d.dir().y()));
 
@@ -405,6 +405,44 @@ namespace tut
 		auto v2d = maths::traits::point_traits<stupid_2d_vector>::origin();
 		ensure(v2d.x() == 0.0);
 		ensure(v2d.y() == 0.0);
+	}
+
+	template<> template<>
+	void test_geom_data_t::object::test<14>()
+	{
+		set_test_name("fit degenerate set of points to plane");
+
+		vector3d line_pt(0.0, 0.0, 0.0);
+		vector3d line_dir(0.5, 0.5, 0.5);
+
+		mt19937_64 line_pt_generator(0xdeadbeefdeadbeef);
+		uniform_real_distribution<double> line_pt_dist(-5.0, 5.0);
+
+		size_t const num_pts = 50;
+
+		vector<maths::vector3d> line_pts(num_pts);
+
+		for (size_t i = 0 ; i < num_pts ; i++)
+			line_pts[i] = line_pt + line_dir * line_pt_dist(line_pt_generator);
+
+		vector3d plane_origin, plane_normal;
+		ensure(!primitive_fitting::plane(line_pts.begin(), line_pts.end(), plane_origin, plane_normal));
+
+		maths::line<double, 3> line_lsq;
+		ensure(primitive_fitting::line(line_pts.begin(), line_pts.end(), line_lsq));
+
+		maths::line<double, 3> line(line_pt, line_dir);
+
+		double rmsd = accumulate(line_pts.begin(), line_pts.end(), 0.0,
+			[&line](double err_sq, const maths::vector3d & p)
+			{
+				const double dist = line.distance(p);
+				err_sq += dist * dist;
+
+				return err_sq;
+			});
+
+		cout << "Line lsq. pt" << line_lsq.point() << " direction: " << line_lsq.dir() << " rmsd: " << rmsd << endl;
 	}
 };
 
