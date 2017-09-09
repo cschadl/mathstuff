@@ -17,8 +17,11 @@ namespace maths
 
 namespace primitive_fitting
 {
-	template <size_t Dim, typename InputIterator, typename PointType>
-	Eigen::JacobiSVD< Eigen::Matrix<typename PointType::value_type, Dim, Eigen::Dynamic> >
+	template <typename PT>
+	using pt_traits = maths::traits::point_traits<PT>;
+
+	template <typename InputIterator, typename PointType, size_t Dim = pt_traits<PointType>::dimension()>
+	Eigen::JacobiSVD< Eigen::Matrix<typename pt_traits<PointType>::value_type, Dim, Eigen::Dynamic> >
 	pointssvd(InputIterator begin, InputIterator end, const PointType & origin)
 	{
 		static_assert(std::is_same<typename std::decay<decltype(*begin)>::type, PointType>::value, "Type mismatch");
@@ -55,12 +58,14 @@ namespace primitive_fitting
 				PointType & out_point,
 				PointType & out_normal)
 	{
+		static_assert(pt_traits<PointType>::dimension() > 2, "Invalid point dimension");
+
 		const size_t n = std::distance(begin, end);
 		if (n < 3)
 			return false;
 
 		PointType origin = centroid(begin, end);
-		auto svd = pointssvd<3>(begin, end, origin);
+		auto svd = pointssvd<InputIterator, PointType, 3>(begin, end, origin);
 
 		if (svd.rank() < 2)
 			return false;
@@ -100,7 +105,7 @@ namespace primitive_fitting
 		}
 
 		point_type origin = centroid(begin, end);
-		auto svd = pointssvd<Dim>(begin, end, origin);
+		auto svd = pointssvd(begin, end, origin);
 
 		auto u0 = svd.matrixU().col(0);
 

@@ -415,10 +415,12 @@ namespace tut
 		vector3d line_pt(0.0, 0.0, 0.0);
 		vector3d line_dir(0.5, 0.5, 0.5);
 
-		mt19937_64 line_pt_generator(0xdeadbeefdeadbeef);
-		uniform_real_distribution<double> line_pt_dist(-5.0, 5.0);
+		//auto line_pt_seed = chrono::high_resolution_clock::now().time_since_epoch().count();
+		auto line_pt_seed = 0xdeadbeefdeadbeef;
+		mt19937_64 line_pt_generator(line_pt_seed);
+		uniform_real_distribution<double> line_pt_dist(-1.0, 1.0);
 
-		size_t const num_pts = 50;
+		size_t const num_pts = 100;
 
 		vector<maths::vector3d> line_pts(num_pts);
 
@@ -431,18 +433,17 @@ namespace tut
 		maths::line<double, 3> line_lsq;
 		ensure(primitive_fitting::line(line_pts.begin(), line_pts.end(), line_lsq));
 
-		maths::line<double, 3> line(line_pt, line_dir);
 
-		double rmsd = accumulate(line_pts.begin(), line_pts.end(), 0.0,
-			[&line](double err_sq, const maths::vector3d & p)
+		double const rmsd = accumulate(line_pts.begin(), line_pts.end(), 0.0,
+			[&line_lsq](double err_sq, const maths::vector3d & p)
 			{
-				const double dist = line.distance(p);
+				const double dist = line_lsq.distance(p);
 				err_sq += dist * dist;
 
 				return err_sq;
 			});
 
-		cout << "Line lsq. pt" << line_lsq.point() << " direction: " << line_lsq.dir() << " rmsd: " << rmsd << endl;
+		ensure(rmsd < 1.0e-8);	// b.s. tolerance
 	}
 };
 
