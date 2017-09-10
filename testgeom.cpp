@@ -412,15 +412,20 @@ namespace tut
 	{
 		set_test_name("fit degenerate set of points to plane");
 
-		vector3d line_pt(0.0, 0.0, 0.0);
-		vector3d line_dir(0.5, 0.5, 0.5);
+		vector3d const line_pt(1.0, 2.0, 3.0);
+		vector3d const line_dir = vector3d(0.5, 0.5, 0.5).unit();
+
+		maths::line<double, 3> line(line_pt, line_dir);
 
 		//auto line_pt_seed = chrono::high_resolution_clock::now().time_since_epoch().count();
 		auto line_pt_seed = 0xdeadbeefdeadbeef;
 		mt19937_64 line_pt_generator(line_pt_seed);
 		uniform_real_distribution<double> line_pt_dist(-1.0, 1.0);
 
-		size_t const num_pts = 100;
+		// There isn't anything very scientific about this,
+		// but adding more points tends to cause primitive_fitting::plane()
+		// to actually succeed (with very small singular values in the SVD)
+		size_t const num_pts = 10;
 
 		vector<maths::vector3d> line_pts(num_pts);
 
@@ -433,6 +438,8 @@ namespace tut
 		maths::line<double, 3> line_lsq;
 		ensure(primitive_fitting::line(line_pts.begin(), line_pts.end(), line_lsq));
 
+		double const line_lsq_pt_dist = line.distance(line_lsq.point());
+		double const line_dir_dist_sq = line.dir().distance_sq(maths::abs(line_lsq.dir()));
 
 		double const rmsd = accumulate(line_pts.begin(), line_pts.end(), 0.0,
 			[&line_lsq](double err_sq, const maths::vector3d & p)
@@ -443,7 +450,10 @@ namespace tut
 				return err_sq;
 			});
 
-		ensure(rmsd < 1.0e-8);	// b.s. tolerance
+		// B.S. tolerances
+		ensure(rmsd < 1.0e-16);
+		ensure(line_lsq_pt_dist < 1.0e-12);
+		ensure(line_dir_dist_sq < 1.0e-16);
 	}
 };
 

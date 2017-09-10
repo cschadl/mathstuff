@@ -354,6 +354,15 @@ inline n_vector<TO, M> convert(const n_vector<FROM, M>& src)
 	return out;
 }
 
+// Specialization of maths::abs<T>() for n_vector<double, 3>
+// Can't do it for the more general case of n_vector<T, N>
+// since C++ doesn't allow partial function specialization.
+template <>
+inline n_vector<double, 3> abs(n_vector<double, 3> v)
+{
+	return n_vector<double, 3>(abs(v.x()), abs(v.y()), abs(v.z()));
+}
+
 };	// namespace maths
 
 #endif /* VECTORS_H_ */
