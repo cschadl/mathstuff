@@ -355,8 +355,7 @@ inline n_vector<TO, M> convert(const n_vector<FROM, M>& src)
 }
 
 // Specialization of maths::abs<T>() for n_vector<double, 3>
-// Can't do it for the more general case of n_vector<T, N>
-// since C++ doesn't allow partial function specialization.
+// How can we do this for the more general case of n_vector<T, n>?
 template <>
 inline n_vector<double, 3> abs(n_vector<double, 3> v)
 {
