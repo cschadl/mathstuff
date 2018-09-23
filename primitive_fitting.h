@@ -18,7 +18,7 @@ namespace maths
 namespace primitive_fitting
 {
 	template <typename PT>
-	using pt_traits = maths::traits::point_traits<PT>;
+	using pt_traits = traits::point_traits<PT>;
 
 	template <typename InputIterator, typename PointType, size_t Dim = pt_traits<PointType>::dimension()>
 	Eigen::JacobiSVD< Eigen::Matrix<typename pt_traits<PointType>::value_type, Dim, Eigen::Dynamic> >
@@ -86,12 +86,12 @@ namespace primitive_fitting
 	template <typename InputIterator, typename LineType>
 	bool line(InputIterator begin, InputIterator end, LineType & out_line)
 	{
-		typedef typename maths::traits::halfspace_traits<LineType>::point_type point_type;
-		typedef typename maths::traits::halfspace_traits<LineType>::vector_type vector_type;
+		typedef typename traits::halfspace_traits<LineType>::point_type point_type;
+		typedef typename traits::halfspace_traits<LineType>::vector_type vector_type;
 
-		constexpr size_t Dim = maths::traits::halfspace_traits<LineType>::dimension();
+		constexpr size_t Dim = traits::halfspace_traits<LineType>::dimension();
 
-		using create_line = maths::adapters::create_line<LineType, Dim>;
+		using create_line = adapters::create_line<LineType, Dim>;
 
 		const size_t n = std::distance(begin, end);
 		if (n < 2)
