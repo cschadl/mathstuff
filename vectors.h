@@ -31,6 +31,8 @@ namespace maths
 template <typename T, size_t N>
 class n_vector
 {
+	static_assert(N > 1, "Vector size must be > 1");
+
 protected:
 	using elements_t = std::array<T, N>;
 
@@ -43,9 +45,11 @@ public:
 public:
 	/// This constructor is for lvalues
 	template <	typename... Vals,
-					std::enable_if_t<stlutil::conjunction<
-						std::is_reference<Vals>...,
-						std::is_same<T, std::decay_t<Vals>>...>::value, void*> = nullptr>
+					std::enable_if_t<
+							stlutil::conjunction<
+								std::is_reference<Vals>...,
+								std::is_same<T, std::decay_t<Vals>>...>::value &&
+							(sizeof...(Vals) > 1), void*> = nullptr>
 	n_vector(Vals&&... vals)
 		: m_v{std::forward<Vals>(vals)...}
 	{
@@ -56,16 +60,18 @@ public:
 
 	/// And this is for rvalues
 	template <	typename... Vals,
-					std::enable_if_t<	stlutil::conjunction<
-						std::is_arithmetic<Vals>...,
-						std::is_convertible<T, Vals>...>::value, void*> = nullptr>
-		n_vector(Vals&&... vals)
-			: m_v{static_cast<T>(std::forward<Vals>(vals))...}	// static_cast<T> avoids 'narrowing int to double' warning...
-		{
-			// We'll still get a compile-time error (too many initializers) if
-			// we have more than N arguments, so just check for too few
-			static_assert(sizeof...(vals) >= N, "Too few arguments");
-		}
+					std::enable_if_t<
+							stlutil::conjunction<
+								std::is_arithmetic<Vals>...,
+								std::is_convertible<T, Vals>...>::value &&
+							(sizeof...(Vals) > 1), void*> = nullptr>
+	n_vector(Vals&&... vals)
+		: m_v{static_cast<T>(std::forward<Vals>(vals))...}	// static_cast<T> avoids 'narrowing int to double' warning...
+	{
+		// We'll still get a compile-time error (too many initializers) if
+		// we have more than N arguments, so just check for too few
+		static_assert(sizeof...(vals) >= N, "Too few arguments");
+	}
 
 	n_vector()
 		: m_v(stlutil::make_array_val<T, N>(T(0)))
@@ -73,11 +79,11 @@ public:
 
 	}
 
-//	n_vector(T const& v)
-//		: m_v(make_array_val<T, N>(v))
-//	{
-//
-//	}
+	n_vector(T v)
+		: m_v(stlutil::make_array_val<T, N>(v))
+	{
+
+	}
 
 	n_vector(const n_vector<T, N>&) = default;
 	n_vector<T, N>& operator=(const n_vector<T, N>&) = default;

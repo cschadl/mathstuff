@@ -51,14 +51,14 @@ namespace tut
 		class stupid_2d_vector : public maths::vector2d
 		{
 		public:
-			stupid_2d_vector() : maths::vector2d(numeric_limits<double>::max(), numeric_limits<double>::max()) { }
+			stupid_2d_vector() : maths::vector2d(numeric_limits<double>::max()) { }
 			stupid_2d_vector(double x, double y) : maths::vector2d(x, y) { }
 		};
 
 		class stupid_3d_vector : public maths::vector3d
 		{
 		public:
-			stupid_3d_vector() : maths::vector3d(numeric_limits<double>::max(), numeric_limits<double>::max(), numeric_limits<double>::max()) { }
+			stupid_3d_vector() : maths::vector3d(numeric_limits<double>::max()) { }
 			stupid_3d_vector(double x, double y, double z) : maths::vector3d(x, y, z) { }
 		};
 
@@ -263,7 +263,7 @@ namespace tut
 		ensure(points.size() == 146);
 
 		double const blah = numeric_limits<double>::max();
-		vector3d sphere_center(blah, blah, blah);
+		vector3d sphere_center(blah);
 		double sphere_radius = blah;
 
 		ensure(primitive_fitting::sphere(points.begin(), points.end(), sphere_center, sphere_radius));
@@ -304,7 +304,7 @@ namespace tut
 		ensure(points.size() == 2692);
 
 		double const blah = numeric_limits<double>::max();
-		vector3d sphere_center(blah, blah, blah);
+		vector3d sphere_center(blah);
 		double sphere_radius = blah;
 
 		ensure(primitive_fitting::sphere(points.begin(), points.end(), sphere_center, sphere_radius));
