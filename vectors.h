@@ -360,7 +360,7 @@ inline n_vector<U, M> operator-(const n_vector<U, M>& v)
 {
 	n_vector<U, M> res;
 	for (size_t i = 0 ; i < M ; i++)
-		res[i] = -(res[i]);
+		res[i] = -(v[i]);
 
 	return res;
 }
