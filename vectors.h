@@ -8,38 +8,76 @@
 #ifndef VECTORS_H_
 #define VECTORS_H_
 
-#include <valarray>
+#include <array>
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <utility>
 
 #include <assert.h>
+
+#include <stlutil/type_traits.h>
+#include <stlutil/make_array.h>
 
 #include "misc.h"
 
 namespace maths
 {
 
+
 /**
  * A vector of N elements
  */
-template <typename T, int N>
+template <typename T, size_t N>
 class n_vector
 {
 protected:
-	std::valarray<T> m_v;	// vector elements
+	using elements_t = std::array<T, N>;
+
+	elements_t m_v;	// vector elements
 
 public:
 	static const size_t Dim = N;
 	typedef T value_type;
 
 public:
-	n_vector() : m_v((T)0, N) { }
-	n_vector(T x, T y);				// 2-vector
-	n_vector(T x, T y, T z);		// 3-vector
-	n_vector(T a, T b, T c, T d);	// 4-vector
-	n_vector(const std::valarray<T>& va) : m_v(va) { assert(m_v.size() == N); }
-	n_vector(const T* data, size_t n) : m_v(data, n) { }
+	/// This constructor is for lvalues
+	template <	typename... Vals,
+					std::enable_if_t<stlutil::conjunction<
+						std::is_reference<Vals>...,
+						std::is_same<T, std::decay_t<Vals>>...>::value, void*> = nullptr>
+	n_vector(Vals&&... vals)
+		: m_v{std::forward<Vals>(vals)...}
+	{
+		// We'll still get a compile-time error (too many initializers) if
+		// we have more than N arguments, so just check for too few
+		static_assert(sizeof...(vals) >= N, "Too few arguments");
+	}
+
+	/// And this is for rvalues
+	template <	typename... Vals,
+					std::enable_if_t<	stlutil::conjunction<
+						std::is_arithmetic<Vals>...,
+						std::is_convertible<T, Vals>...>::value, void*> = nullptr>
+		n_vector(Vals&&... vals)
+			: m_v{static_cast<T>(std::forward<Vals>(vals))...}	// static_cast<T> avoids 'narrowing int to double' warning...
+		{
+			// We'll still get a compile-time error (too many initializers) if
+			// we have more than N arguments, so just check for too few
+			static_assert(sizeof...(vals) >= N, "Too few arguments");
+		}
+
+	n_vector()
+		: m_v(stlutil::make_array_val<T, N>(T(0)))
+	{
+
+	}
+
+//	n_vector(T const& v)
+//		: m_v(make_array_val<T, N>(v))
+//	{
+//
+//	}
 
 	n_vector(const n_vector<T, N>&) = default;
 	n_vector<T, N>& operator=(const n_vector<T, N>&) = default;
@@ -82,24 +120,48 @@ public:
 	bool is_unit() const;
 
 	// Arithmetic operations
-	template<typename U, int M> friend n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
-	template<typename U, int M> friend n_vector<U, M> operator-(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
-	template<typename U, int M> friend U              operator*(const n_vector<U, M>& v1, const n_vector<U, M>& v2);	// dot
-	template<typename U, int M> friend n_vector<U, M> operator*(const n_vector<U, M>& v, const U c);
-	template<typename U, int M> friend n_vector<U, M> operator*(const U c, const n_vector<U, M>& v);
-	template<typename U, int M> friend n_vector<U, M> operator/(const n_vector<U, M>& v, const U d);
-	template<typename U, int M> friend n_vector<U, M> operator/(const U d, const n_vector<U, M>& v);
-	template<typename U, int M> friend n_vector<U, M> operator-(const n_vector<U, M>& v);	// negation
-	template<typename U, int M> friend n_vector<U, M> operator%(const n_vector<U, M>& v1, const n_vector<U, M>& v2);	// cross
-	template<typename U, int M> friend n_vector<U, M> outer_product(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
-	template<typename U, int M> friend n_vector<U, M> cross(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
+	template<typename U, size_t M> friend n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
+	template<typename U, size_t M> friend n_vector<U, M> operator-(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
+	template<typename U, size_t M> friend U              operator*(const n_vector<U, M>& v1, const n_vector<U, M>& v2);	// dot
+	template<typename U, size_t M> friend n_vector<U, M> operator*(const n_vector<U, M>& v, U const& c);
+	template<typename U, size_t M> friend n_vector<U, M> operator*(U const& c, const n_vector<U, M>& v);
+	template<typename U, size_t M> friend n_vector<U, M> operator/(const n_vector<U, M>& v, U const& d);
+	template<typename U, size_t M> friend n_vector<U, M> operator/(U const& d, const n_vector<U, M>& v);
+	template<typename U, size_t M> friend n_vector<U, M> operator-(const n_vector<U, M>& v);	// negation
+	template<typename U, size_t M> friend n_vector<U, M> operator%(const n_vector<U, M>& v1, const n_vector<U, M>& v2);	// cross
+	template<typename U, size_t M> friend n_vector<U, M> outer_product(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
+	template<typename U, size_t M> friend n_vector<U, M> cross(const n_vector<U, M>& v1, const n_vector<U, M>& v2);
 
-	n_vector<T, N>& operator+=(const n_vector<T, N>& v) { m_v += v.m_v; return *this; }
-	n_vector<T, N>& operator-=(const n_vector<T, N>& v) { m_v -= v.m_v; return *this; }
-	n_vector<T, N>& operator*=(const T c) { m_v *= c; return *this; }
-	n_vector<T, N>& operator/=(const T d) { m_v /= d; return *this; }
+	n_vector<T, N>& operator+=(const n_vector<T, N>& v)
+	{
+		for (size_t i = 0 ; i < N ; i++)
+			m_v[i] += v.m_v[i];
 
-	const std::valarray<T>& get_valarray() const { return m_v; }
+		return *this;
+	}
+	n_vector<T, N>& operator-=(const n_vector<T, N>& v)
+	{
+		for (size_t i = 0 ; i < N ; i++)
+			m_v[i] -= v.m_v[i];
+
+		return *this;
+	}
+	n_vector<T, N>& operator*=(T c)
+	{
+		for (size_t i = 0 ; i < N ; i++)
+			m_v[i] *= c;
+
+		return *this;
+	}
+	n_vector<T, N>& operator/=(T d)
+	{
+		for (size_t i = 0 ; i < N ; i++)
+			m_v[i] /= d;
+
+		return *this;
+	}
+
+	const elements_t& get_elements() const { return m_v; }
 
 	// unit vectors
 	// these don't work very well (need to be called like vector3d::n_vector<double>i()
@@ -134,37 +196,7 @@ typedef n_vector<float,  3> vector3f;
 //	return uz;
 //}
 
-template <typename T, int N>
-n_vector<T, N>::n_vector(T x, T y)
-: m_v((T)0, N)
-{
-	assert(size() == 2);
-	m_v[0] = x;
-	m_v[1] = y;
-}
-
-template <typename T, int N>
-n_vector<T, N>::n_vector(T x, T y, T z)
-: m_v((T)0, N)
-{
-	assert(size() == 3);
-	m_v[0] = x;
-	m_v[1] = y;
-	m_v[2] = z;
-}
-
-template <typename T, int N>
-n_vector<T, N>::n_vector(T a, T b, T c, T d)
-: m_v((T)0, N)
-{
-	assert(size() == 4);
-	m_v[0] = a;
-	m_v[1] = b;
-	m_v[2] = c;
-	m_v[3] = d;
-}
-
-template <typename T, int N>
+template <typename T, size_t N>
 bool n_vector<T, N>::operator==(const n_vector<T, N>& rhs) const
 {
 	for (size_t i = 0 ; i < Dim ; i++)
@@ -174,58 +206,58 @@ bool n_vector<T, N>::operator==(const n_vector<T, N>& rhs) const
 	return true;
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 bool n_vector<T, N>::is_close(const n_vector<T, N>& v, const T tol) const
 {
 	return maths::close(distance_sq(v), 0.0, tol * tol);
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 bool n_vector<T, N>::is_null() const
 {
 	const T tol = std::numeric_limits<T>::epsilon();	// should be OK for comparing to 0
 	return is_close(n_vector<T, N>(), tol);
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 bool n_vector<T, N>::is_unit() const
 {
 	return close(length(), T(1.0), std::numeric_limits<T>::epsilon());
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::length() const
 {
 	return norm(2);
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::length_sq() const
 {
 	const n_vector<T, N> & v = *this;
 	return v * v;
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::distance_sq(const n_vector<T, N>& q) const
 {
 	return ((*this) - q).length_sq();
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 n_vector<T, N> n_vector<T, N>::make_unit() const
 {
 	return n_vector<T, N>(*this).unit();
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 n_vector<T, N>& n_vector<T, N>::unit()
 {
-	m_v /= norm(2);
+	*this /= norm(2);
 	return *this;
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::norm(unsigned int p) const
 {
 	// TODO - p must not be 0
@@ -239,70 +271,98 @@ T n_vector<T, N>::norm(unsigned int p) const
 	return p_norm;
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::max_norm() const
 {
 	// TODO - inefficient
-	std::valarray<T> m_copy = abs(m_v);
+	elements_t m_copy = abs(m_v);
 	return m_copy.max();
 }
 
-template <typename T, int N>
+template <typename T, size_t N>
 T n_vector<T, N>::inner_product(const n_vector<T, N>& rhs) const
 {
 	T scalar_product = 0;
-	for (int i = 0 ; i < N ; i++)
+	for (size_t i = 0 ; i < N ; i++)
 		scalar_product += (m_v[i] * rhs.m_v[i]);
 
 	return scalar_product;
 }
 
-template <typename U, int M>
+template <typename U, size_t M>
 inline n_vector<U, M> operator+(const n_vector<U, M>& v1, const n_vector<U, M>& v2)
 {
-	return n_vector<U, M>(v1.m_v + v2.m_v);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = v1[i] + v2[i];
+
+	return res;
 }
 
-template <typename U, int M>
+template <typename U, size_t M>
 inline n_vector<U, M> operator-(const n_vector<U, M>& v1, const n_vector<U, M>& v2)
 {
-	return n_vector<U, M>(v1.m_v - v2.m_v);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = v1[i] - v2[i];
+
+	return res;
 }
 
-template <typename U, int M>
+template <typename U, size_t M>
 inline U operator*(const n_vector<U, M>& v1, const n_vector<U, M>& v2)
 {
 	return v1.inner_product(v2);
 }
 
-template <typename U, int M>
-inline n_vector<U, M>operator*(const n_vector<U, M>& v, const U c)
+template <typename U, size_t M>
+inline n_vector<U, M> operator*(const n_vector<U, M>& v, U const& c)
 {
-	return n_vector<U, M>(v.m_v * c);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = v[i] * c;
+
+	return res;
 }
 
-template <typename U, int M>
-inline n_vector<U, M> operator*(const U c, const n_vector<U, M>& v)
+template <typename U, size_t M>
+inline n_vector<U, M> operator*(U const& c, n_vector<U, M> const& v)
 {
-	return v * c;
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = c * v[i];
+
+	return res;
 }
 
-template <typename U, int M>
-inline n_vector<U, M> operator/(const n_vector<U, M>& v, const U d)
+template <typename U, size_t M>
+inline n_vector<U, M> operator/(const n_vector<U, M>& v, U const& c)
 {
-	return n_vector<U, M>(v.m_v / d);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = v[i] / c;
+
+	return res;
 }
 
-template <typename U, int M>
-inline n_vector<U, M> operator/(const U d, const n_vector<U, M>& v)
+template <typename U, size_t M>
+inline n_vector<U, M> operator/(U const& c, n_vector<U, M> const& v)
 {
-	return n_vector<U, M>(d / v.m_v);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = c / v[i];
+
+	return res;
 }
 
-template <typename U, int M>
+template <typename U, size_t M>
 inline n_vector<U, M> operator-(const n_vector<U, M>& v)
 {
-	return n_vector<U, M>(-v.m_v);
+	n_vector<U, M> res;
+	for (size_t i = 0 ; i < M ; i++)
+		res[i] = -(res[i]);
+
+	return res;
 }
 
 // For now, the outer product only has partial specializations for
@@ -311,11 +371,9 @@ template <typename U>
 inline
 n_vector<U, 3> outer_product(const n_vector<U, 3>& v1, const n_vector<U, 3>& v2)
 {
-	const U n0 = (v1[1] * v2[2]) - (v1[2] * v2[1]);
-	const U n1 = (v1[2] * v2[0]) - (v1[0] * v2[2]);
-	const U n2 = (v1[0] * v2[1]) - (v1[1] * v2[0]);
-
-	return n_vector<U, 3>(n0, n1, n2);
+	return n_vector<U, 3>((v1[1] * v2[2]) - (v1[2] * v2[1]),
+								 (v1[2] * v2[0]) - (v1[0] * v2[2]),
+								 (v1[0] * v2[1]) - (v1[1] * v2[0]));
 }
 
 template <typename U>
@@ -332,7 +390,7 @@ n_vector<U, 3> operator%(const n_vector<U, 3>& v1, const n_vector<U, 3>& v2)
 	return outer_product(v1, v2);
 }
 
-template <typename U, int M>
+template <typename U, size_t M>
 inline std::ostream& operator<<(std::ostream& os, const n_vector<U, M>& v)
 {
 	os << "( ";
@@ -343,7 +401,7 @@ inline std::ostream& operator<<(std::ostream& os, const n_vector<U, M>& v)
 	return os;
 }
 
-template <typename TO, typename FROM, int M>
+template <typename TO, typename FROM, size_t M>
 inline n_vector<TO, M> convert(const n_vector<FROM, M>& src)
 {
 	n_vector<TO, M> out;
