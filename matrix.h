@@ -367,6 +367,76 @@ public:
 	friend class matrix<T>;
 };
 
+////////////////////////////////////
+/// exception types
+
+class matrix_exception
+{
+public:
+	virtual std::string what() const = 0;
+	virtual ~matrix_exception() { }
+};
+
+template <typename T>
+class matrix_index_exception : public matrix_exception
+{
+protected:
+	const size_t num_rows;
+	const size_t num_cols;
+	const size_t req_i;
+	const size_t req_j;
+	const size_t row_start;
+	const size_t row_end;
+	const size_t col_start;
+	const size_t col_end;
+public:
+	matrix_index_exception(const matrix<T>* m, size_t i, size_t j)
+	: num_rows(m->rows())
+	, num_cols(m->cols())
+	, req_i(i)
+	, req_j(j)
+	, row_start(m->r_begin())
+	, row_end(m->r_end())
+	, col_start(m->c_begin())
+	, col_end(m->c_end())
+	{
+
+	}
+
+	virtual std::string what() const
+	{
+		std::stringstream ss;
+		ss << "Bad index: (" << req_i << ", " << req_j << ")";
+		return ss.str();
+	}
+};
+
+template <typename T>
+class matrix_dimension_mismatch_exception : public matrix_exception
+{
+public:
+	const size_t m1_rows;
+	const size_t m1_cols;
+	const size_t m2_rows;
+	const size_t m2_cols;
+
+	matrix_dimension_mismatch_exception(const matrix<T>& m1, const matrix<T>& m2)
+	: m1_rows(m1.rows())
+	, m1_cols(m1.cols())
+	, m2_rows(m2.rows())
+	, m2_cols(m2.cols())
+	{
+
+	}
+
+	virtual std::string what() const { return std::string("dimension mismatch");	 }// bleh
+};
+
+class invalid_matrix_exception : public matrix_exception
+{
+	virtual std::string what() const { return std::string("invalid matrix");	}// bleh
+};
+
 };
 #include "matrix.hpp"
 
