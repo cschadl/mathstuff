@@ -1,4 +1,5 @@
 CXX=g++
+#CXX=clang++
 INCLUDE=-I /usr/include/eigen3
 CFLAGS=-Wall -O3 -std=c++11
 CFLAGS_DEP=-std=c++11
