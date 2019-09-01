@@ -114,9 +114,56 @@ public:
 	const T& x() const 	{ return m_v[0]; }
 	      T& x()		{ return m_v[0]; }
 	const T& y() const 	{ return m_v[1]; }
-		  T& y()		{ return m_v[1]; }
-	const T& z() const	{ return m_v[2]; }
-		  T& z()		{ return m_v[2]; }
+		   T& y()		{ return m_v[1]; }
+	const T& z() const
+	{
+		static_assert(N > 2, "Cannot call z() for N < 3");
+		return m_v[2];
+	}
+   T& z()
+   {
+   	static_assert(N > 2, "Cannot call z() for N < 3");
+   	return m_v[2];
+   }
+   const T& w() const
+   {
+   	static_assert(N > 3, "Cannot call w() for N < 4");
+   	return m_v[3];
+   }
+   T& w()
+   {
+   	static_assert(N > 3, "Cannot call w() for N < 4");
+   	return m_v[3];
+   }
+
+   // One consequence of the forwarding reference constructors is that we can't do e.g.
+   // n_vector<float, 3> dz(0.f, 0.f, some_float);
+   // since the first 2 args will be passed as 'float' and the last as 'float const&'
+   // So, use these for setting some specific x, y, z or w value
+   n_vector<T, N>& with_x(T x)
+	{
+   	m_v[0] = x;
+   	return *this;
+	}
+   n_vector<T, N>& with_y(T y)
+	{
+   	m_v[1] = y;
+   	return *this;
+	}
+   n_vector<T, N>& with_z(T z)
+	{
+   	static_assert(N > 2, "Cannot call with_z() for N < 3");
+
+   	m_v[2] = z;
+   	return *this;
+	}
+   n_vector<T, N>& with_w(T w)
+	{
+		static_assert(N > 3, "Cannot call with_w() for n < 4");
+
+		m_v[3] = w;
+		return *this;
+	}
 
 	bool operator==(const n_vector<T, N>& rhs) const;
 	bool operator!=(const n_vector<T, N>& rhs) const { return !(*this == rhs); }
