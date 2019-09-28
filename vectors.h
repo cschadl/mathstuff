@@ -73,6 +73,14 @@ public:
 		static_assert(sizeof...(vals) >= N, "Too few arguments");
 	}
 
+	/// This must be called as @code n_vector<T, N>({...}) @endcode
+	/// It's useful in cases where the args are a mix of rvalues and lvalues.
+	n_vector(std::array<T, N> array)
+		: m_v(std::move(array))
+	{
+
+	}
+
 	n_vector()
 		: m_v(stlutil::make_array_val<T, N>(T(0)))
 	{
