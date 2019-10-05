@@ -49,7 +49,7 @@ public:
 							stlutil::conjunction<
 								std::is_reference<Vals>...,
 								std::is_same<T, std::decay_t<Vals>>...>::value &&
-							(sizeof...(Vals) > 1), void*> = nullptr>
+							(sizeof...(Vals) > 1), void*> = nullptr>	/* to think I did this to save typing... */
 	n_vector(Vals&&... vals)
 		: m_v{std::forward<Vals>(vals)...}
 	{
@@ -128,44 +128,44 @@ public:
 		static_assert(N > 2, "Cannot call z() for N < 3");
 		return m_v[2];
 	}
-   T& z()
-   {
-   	static_assert(N > 2, "Cannot call z() for N < 3");
-   	return m_v[2];
-   }
-   const T& w() const
-   {
-   	static_assert(N > 3, "Cannot call w() for N < 4");
-   	return m_v[3];
-   }
-   T& w()
-   {
-   	static_assert(N > 3, "Cannot call w() for N < 4");
-   	return m_v[3];
-   }
+   	T& z()
+   	{
+   		static_assert(N > 2, "Cannot call z() for N < 3");
+   		return m_v[2];
+  	}
+   	const T& w() const
+   	{
+   		static_assert(N > 3, "Cannot call w() for N < 4");
+   		return m_v[3];
+   	}
+   	T& w()
+   	{
+   		static_assert(N > 3, "Cannot call w() for N < 4");
+   		return m_v[3];
+   	}
 
-   // One consequence of the forwarding reference constructors is that we can't do e.g.
-   // n_vector<float, 3> dz(0.f, 0.f, some_float);
-   // since the first 2 args will be passed as 'float' and the last as 'float const&'
-   // So, use these for setting some specific x, y, z or w value
-   n_vector<T, N>& with_x(T x)
+   	// One consequence of the forwarding reference constructors is that we can't do e.g.
+   	// n_vector<float, 3> dz(0.f, 0.f, some_float);
+   	// since the first 2 args will be passed as 'float' and the last as 'float const&'
+   	// So, use these for setting some specific x, y, z or w value
+	n_vector<T, N>& with_x(T x)
 	{
-   	m_v[0] = x;
-   	return *this;
+   		m_v[0] = x;
+   		return *this;
 	}
-   n_vector<T, N>& with_y(T y)
+   	n_vector<T, N>& with_y(T y)
 	{
-   	m_v[1] = y;
-   	return *this;
+   		m_v[1] = y;
+   		return *this;
 	}
-   n_vector<T, N>& with_z(T z)
+   	n_vector<T, N>& with_z(T z)
 	{
-   	static_assert(N > 2, "Cannot call with_z() for N < 3");
+   		static_assert(N > 2, "Cannot call with_z() for N < 3");
 
-   	m_v[2] = z;
-   	return *this;
+   		m_v[2] = z;
+   		return *this;
 	}
-   n_vector<T, N>& with_w(T w)
+   	n_vector<T, N>& with_w(T w)
 	{
 		static_assert(N > 3, "Cannot call with_w() for n < 4");
 
