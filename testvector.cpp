@@ -40,6 +40,31 @@ namespace tut
 	template <> template <>
 	void vector_tests::object::test<1>()
 	{
+		set_test_name("Constructors");
+
+		vector3d v0;
+		ensure(v0[0] == 0);
+		ensure(v0[1] == 0);
+		ensure(v0[2] == 0);
+
+		vector3d v1(3.5);
+		ensure(v1[0] == 3.5);
+		ensure(v1[1] == 3.5);
+		ensure(v1[2] == 3.5);
+
+		vector3d v2(1);
+		ensure(v2[0] == 1);
+		ensure(v2[1] == 1);
+		ensure(v2[2] == 1);
+
+		vector3d v1_2(v1);
+		ensure(v1_2 == v1);
+		ensure(v1_2 != v0);
+	}
+
+	template <> template <>
+	void vector_tests::object::test<2>()
+	{
 		set_test_name("inner product");
 
 		const double tol = std::numeric_limits<double>::epsilon();
@@ -57,7 +82,7 @@ namespace tut
 	}
 
 	template <> template<>
-	void vector_tests::object::test<2>()
+	void vector_tests::object::test<3>()
 	{
 		set_test_name("vector length");
 
@@ -75,7 +100,7 @@ namespace tut
 	}
 
 	template <> template <>
-	void vector_tests::object::test<3>()
+	void vector_tests::object::test<4>()
 	{
 		set_test_name("arithmetic");
 

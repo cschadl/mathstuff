@@ -6,3 +6,4 @@ Release/
 Debug/
 build-Release/
 build-Debug/
+*.d
