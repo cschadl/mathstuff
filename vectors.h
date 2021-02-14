@@ -33,13 +33,13 @@ class n_vector
 {
 	static_assert(N > 1, "Vector size must be > 1");
 
-protected:
+private:
 	using elements_t = std::array<T, N>;
 
 	elements_t m_v;	// vector elements
 
 public:
-	static const size_t Dim = N;
+	static constexpr size_t Dim = N;
 	typedef T value_type;
 
 public:
