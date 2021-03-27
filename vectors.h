@@ -114,8 +114,7 @@ public:
 	T norm(unsigned int p) const;
 	T max_norm() const;
 	T inner_product(const n_vector<T, N>& rhs) const;
-
-	// TODO - bounds checking (std::valarray fails it)
+	
 	T& operator[](unsigned int i) { return m_v[i]; }
 	const T& operator[](unsigned int i) const { return m_v[i]; }
 
