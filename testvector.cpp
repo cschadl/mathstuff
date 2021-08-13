@@ -138,5 +138,10 @@ namespace tut
 
 		n_vector<double, 3> v3d_3({0.0, j().y(), 0.0});	// have to construct from std::array
 		ensure(v3d_3 == j());
+
+		double const dz = 0.1;
+		n_vector<double, 3> v3d_4({0.0, j().y(), j().z() + dz});
+
+		ensure(v3d_4 == n_vector<double, 3>{0.0, 1.0, 0.1 });
 	}
 };
